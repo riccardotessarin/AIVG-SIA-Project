@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,16 +12,25 @@ public class FSMState {
 	public List<FSMAction> exitActions = new List<FSMAction> ();
 
 	// A dictionary of transitions and the states they are leading to
-	private Dictionary<FSMTransition, FSMState> links;
+	//private Dictionary<FSMTransition, FSMState> links;
+
+	// A decision tree to evaluate transitions
+	private DecisionTree transionTree;
 
 	public FSMState() {
-		links = new Dictionary<FSMTransition, FSMState>();
+		//links = new Dictionary<FSMTransition, FSMState>();
 	}
 
 	// We link a decision tree to a transition
+	public void AddTransition(DecisionTree transition) {
+		transionTree = transition;
+	}
+
+	/*
 	public void AddTransition(FSMTransition transition, FSMState target) {
 		links [transition] = target;
 	}
+	*/
 
 	public FSMTransition VerifyTransitions() {
 		foreach (FSMTransition t in links.Keys) {
@@ -38,4 +48,8 @@ public class FSMState {
 	public void Stay() { foreach (FSMAction a in stayActions) a(); }
 	public void Exit() { foreach (FSMAction a in exitActions) a(); }
 
+	internal void AddTransition(CalmDT calmDT)
+	{
+		throw new NotImplementedException();
+	}
 }

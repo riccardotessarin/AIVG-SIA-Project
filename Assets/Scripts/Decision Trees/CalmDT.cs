@@ -2,17 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CalmDT : MonoBehaviour
+public class CalmDT
 {
-	// Start is called before the first frame update
-	void Start()
-	{
-		
-	}
+	private DecisionTree dt;
 
-	// Update is called once per frame
-	void Update()
-	{
-		
+	void InitTree() {
+		// We define the states the DT can reach starting from the current state
+
+		// We define the conditions to reach each state
+		//DTDecision d1 = new DTDecision();
 	}
 }
