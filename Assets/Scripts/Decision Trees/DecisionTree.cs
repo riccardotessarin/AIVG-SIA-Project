@@ -4,7 +4,8 @@ using System.Collections.Generic;
 // Interface for both decisions and actions
 // Any node belonging to the decision tree must be walkable
 public interface IDTNode {
-	DTAction Walk();
+	//DTAction Walk();
+	FSMState Walk();
 }
 
 // This delegate will defer functions to both
@@ -35,13 +36,14 @@ public class DTDecision : IDTNode {
 	// We call the selector and check if there is a matching link
 	// for the return value. In such case, we Walk() on the link
 	// No link means no action and null is returned
-	public DTAction Walk() {
+	public FSMState Walk() {
 		object o = Selector(null);
 		return links.ContainsKey(o) ? links[o].Walk() : null;
 	}
 }
 
 // Action node
+/*
 public class DTAction : IDTNode {
 
 	// The methos to perform the action
@@ -55,6 +57,8 @@ public class DTAction : IDTNode {
 	public DTAction Walk() { return this; }
 }
 
+*/
+
 // This class is holding our decision structure
 public class DecisionTree {
 
@@ -67,9 +71,9 @@ public class DecisionTree {
 
 	// Walk the structure and call the resulting action (if any)
 	// a null means no action is required.
-	public object walk() {
-		DTAction result = root.Walk();
-		if (result != null) return result.Action(null);
+	public FSMState walk() {
+		FSMState result = root.Walk();
+		if (result != null) return result;
 		return null;
 	}
 }

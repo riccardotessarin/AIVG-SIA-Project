@@ -6,6 +6,8 @@ using UnityEngine;
 public class MonsterBehaviour : MonoBehaviour
 {
 
+	private float reactionTime = 0.5f;
+
 	private float health = 100f;
 	private float hunger = 0f;
 	private float sleepiness = 0f;
@@ -38,7 +40,7 @@ public class MonsterBehaviour : MonoBehaviour
 		// Define links between decisions
 		calmd1.AddLink(true, calmd2);
 		calmd1.AddLink(false, replenishState);
-		calmd2.AddLink(true, calmState);
+		//calmd2.AddLink(true, calmState); // NOTE: if we want to stay in the same state, we don't need to add a link
 		calmd2.AddLink(false, calmd3);
 		calmd3.AddLink(true, angryState);
 		calmd3.AddLink(false, annoyedState);
@@ -54,7 +56,7 @@ public class MonsterBehaviour : MonoBehaviour
 		annoyedd2.AddLink(true, calmState);
 		annoyedd2.AddLink(false, annoyedd3);
 		annoyedd3.AddLink(true, angryState);
-		annoyedd3.AddLink(false, annoyedState);
+		//annoyedd3.AddLink(false, annoyedState); // NOTE: if we want to stay in the same state, we don't need to add a link
 
 		// From replenish state
 		DTDecision replenishd1 = new DTDecision(GoodMentalStatus);
@@ -67,13 +69,13 @@ public class MonsterBehaviour : MonoBehaviour
 		replenishd1.AddLink(true, replenishd2);
 		replenishd1.AddLink(false, replenishd2bis);
 		replenishd2.AddLink(true, calmState);
-		replenishd2.AddLink(false, replenishState);
+		//replenishd2.AddLink(false, replenishState); // NOTE: if we want to stay in the same state, we don't need to add a link
 		replenishd2bis.AddLink(true, replenishd3);
 		replenishd2bis.AddLink(false, replenishd4);
 		replenishd3.AddLink(true, angryState);
 		replenishd3.AddLink(false, annoyedState);
 		replenishd4.AddLink(true, berserkState);
-		replenishd4.AddLink(false, replenishState);
+		//replenishd4.AddLink(false, replenishState); // NOTE: if we want to stay in the same state, we don't need to add a link
 
 
 		// From angry state
@@ -85,7 +87,7 @@ public class MonsterBehaviour : MonoBehaviour
 		angryd1.AddLink(true, angryd2);
 		angryd1.AddLink(false, angryd3);
 		angryd2.AddLink(true, calmState);
-		angryd2.AddLink(false, angryState);
+		//angryd2.AddLink(false, angryState); // NOTE: if we want to stay in the same state, we don't need to add a link
 		angryd3.AddLink(true, berserkState);
 		angryd3.AddLink(false, replenishState);
 
@@ -96,7 +98,7 @@ public class MonsterBehaviour : MonoBehaviour
 
 		// Define links between decisions
 		berserkd1.AddLink(true, replenishState);
-		berserkd1.AddLink(false, berserkState);
+		//berserkd1.AddLink(false, berserkState); // NOTE: if we want to stay in the same state, we don't need to add a link
 
 		// Setup my DecisionTree at the root node
 		calmDT = new DecisionTree(calmd1);
@@ -112,6 +114,15 @@ public class MonsterBehaviour : MonoBehaviour
 		angryState.AddTransition(angryDT);
 		berserkState.AddTransition(berserkDT);
 
+
+		StartCoroutine(UpdateFSM());
+	}
+
+	public IEnumerator UpdateFSM() {
+		while (true) {
+			monsterFSM.Update();
+			yield return new WaitForSeconds(reactionTime);
+		}
 	}
 
 

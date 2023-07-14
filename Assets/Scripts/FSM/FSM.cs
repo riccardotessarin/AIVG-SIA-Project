@@ -21,12 +21,31 @@ public class FSM {
 	// Otherwise, if no condition is activated,
 	// (5) Execute actions associated to staying into the current state
 
+	/*
+
 	public void Update() { // NOTE: this is NOT a MonoBehaviour
 		FSMTransition transition = current.VerifyTransitions ();
 		if (transition != null) {
 			current.Exit();		// 1
 			transition.Fire();	// 2
 			current = current.NextState(transition);	// 3
+			current.Enter();	// 4
+		} else {
+			current.Stay();		// 5
+		}
+	}
+
+	*/
+
+	// This is the new Update method, using the decision tree
+	public void Update() {
+		//DecisionTree transition = current.VerifyTransitions ();
+		FSMState transition = current.transionTree.walk();
+		if (transition != null) {
+			current.Exit();		// 1
+			//transition.Fire();	// 2
+			//current = current.NextState(transition);	// 3
+			current = transition;
 			current.Enter();	// 4
 		} else {
 			current.Stay();		// 5

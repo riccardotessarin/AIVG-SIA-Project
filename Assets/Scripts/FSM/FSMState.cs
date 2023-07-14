@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FSMState {
+public class FSMState: IDTNode {
 
 	// Arrays of actions to perform based on transitions fire (or not)
 	// Getters and setters are preferable, but we want to keep the source clean
@@ -15,7 +15,7 @@ public class FSMState {
 	//private Dictionary<FSMTransition, FSMState> links;
 
 	// A decision tree to evaluate transitions
-	private DecisionTree transionTree;
+	public DecisionTree transionTree;
 
 	public FSMState() {
 		//links = new Dictionary<FSMTransition, FSMState>();
@@ -30,7 +30,7 @@ public class FSMState {
 	public void AddTransition(FSMTransition transition, FSMState target) {
 		links [transition] = target;
 	}
-	*/
+	
 
 	public FSMTransition VerifyTransitions() {
 		foreach (FSMTransition t in links.Keys) {
@@ -39,17 +39,23 @@ public class FSMState {
 		return null;
 	}
 
+
 	public FSMState NextState(FSMTransition t) {
 		return links [t];
 	}
+
+	*/
 	
 	// These methods will perform the actions in each list
 	public void Enter() { foreach (FSMAction a in enterActions) a(); }
 	public void Stay() { foreach (FSMAction a in stayActions) a(); }
 	public void Exit() { foreach (FSMAction a in exitActions) a(); }
 
-	internal void AddTransition(CalmDT calmDT)
+	// This is the method to walk the decision tree
+
+
+	public FSMState Walk()
 	{
-		throw new NotImplementedException();
+		return this;
 	}
 }
