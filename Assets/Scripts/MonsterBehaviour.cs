@@ -6,7 +6,9 @@ using UnityEngine;
 public class MonsterBehaviour : MonoBehaviour
 {
 
-	private float reactionTime = 0.5f;
+	public GameObject player;
+
+	private float reactionTime = 1.5f;
 
 	private float health = 100f;
 	private float hunger = 0f;
@@ -25,11 +27,11 @@ public class MonsterBehaviour : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
 	{
-		FSMState calmState = new FSMState();
-		FSMState annoyedState = new FSMState();
-		FSMState replenishState = new FSMState();
-		FSMState angryState = new FSMState();
-		FSMState berserkState = new FSMState();
+		FSMState calmState = new FSMState("calm");
+		FSMState annoyedState = new FSMState("annoyed");
+		FSMState replenishState = new FSMState("replenish");
+		FSMState angryState = new FSMState("angry");
+		FSMState berserkState = new FSMState("berserk");
 
 		// Define DT transitions for each state
 		// From calm state
@@ -114,6 +116,7 @@ public class MonsterBehaviour : MonoBehaviour
 		angryState.AddTransition(angryDT);
 		berserkState.AddTransition(berserkDT);
 
+		monsterFSM = new FSM(calmState);
 
 		StartCoroutine(UpdateFSM());
 	}
@@ -129,26 +132,59 @@ public class MonsterBehaviour : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		
+		if (Input.GetKeyDown(KeyCode.Return)) {
+			Debug.Log("Current stats: " + health + " " + hunger + " " + sleepiness + " " + stress + " " + grudge);
+		}
+		if (Input.GetKeyDown(KeyCode.Space)) {
+			health = 100f;
+			hunger = 0f;
+			sleepiness = 0f;
+			stress = 0f;
+			grudge = 0f;
+		}
+		if (Input.GetKeyDown(KeyCode.H)) {
+			health -= 20f;
+			Debug.Log("Health: " + health);
+		}
+		if (Input.GetKeyDown(KeyCode.S)) {
+			stress += 20f;
+			Debug.Log("Stress: " + stress);
+		}
+		if (Input.GetKeyDown(KeyCode.G)) {
+			grudge += 20f;
+			Debug.Log("Grudge: " + grudge);
+		}
 	}
 	
 	
 	// Decisions
 
 	private object GoodPhysicalStatus(object o) {
-		throw new NotImplementedException();
+		if (health > 20f && hunger < 80f && sleepiness < 80f) {
+			return true;
+		}
+		return false;
 	}
 
 	private object GoodMentalStatus(object o) {
+		if (stress + grudge < 50f) {
+			return true;
+		}
 		return false;
 	}
 
 	private object PlayerInRange(object o) {
-		throw new NotImplementedException();
+		if (Vector3.Distance(transform.position, player.transform.position) < 10f) {
+			return true;
+		}
+		return false;
 	}
 
 	private object IsAngry(object o) {
-		throw new NotImplementedException();
+		if (stress + grudge > 100f) {
+			return true;
+		}
+		return false;
 	}
 	
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class FSM {
 
@@ -39,6 +40,7 @@ public class FSM {
 
 	// This is the new Update method, using the decision tree
 	public void Update() {
+		//Debug.Log("Current state: " + current.stateName + "");
 		//DecisionTree transition = current.VerifyTransitions ();
 		FSMState transition = current.transionTree.walk();
 		if (transition != null) {
@@ -47,6 +49,7 @@ public class FSM {
 			//current = current.NextState(transition);	// 3
 			current = transition;
 			current.Enter();	// 4
+			Debug.Log("New state: " + current.stateName + "");
 		} else {
 			current.Stay();		// 5
 		}
