@@ -9,6 +9,12 @@ public class MonsterBehaviour : MonoBehaviour
 	public GameObject player;
 
 	private float reactionTime = 1.5f;
+	
+	private float roamSpeed = 1f;
+	private float fleeSpeed = 3f;
+	private float chaseSpeed = 3f;
+	private float berserkSpeed = 5f;
+	private float currentSpeed;
 
 	private float health = 100f;
 	private float hunger = 0f;
@@ -23,6 +29,24 @@ public class MonsterBehaviour : MonoBehaviour
 	private DecisionTree replenishDT;
 	private DecisionTree angryDT;
 	private DecisionTree berserkDT;
+
+	private bool isRoaming = false;
+	private bool isReplenishing = false;
+	private bool isHealing = false;
+	private bool isSleeping = false;
+	private bool isEating = false;
+	private bool isFleeing = false;
+	private bool isChasing = false;
+	private bool isChasingBerserk = false;
+	private bool isAttacking = false;
+
+	private enum MonsterState { calm, annoyed, replenish, angry, berserk };
+	private MonsterState currentState;
+	
+	private void Awake() {
+		currentState = MonsterState.calm;
+		currentSpeed = roamSpeed;
+	}
 
 	// Start is called before the first frame update
 	void Start()
@@ -116,6 +140,24 @@ public class MonsterBehaviour : MonoBehaviour
 		angryState.AddTransition(angryDT);
 		berserkState.AddTransition(berserkDT);
 
+		// Define actions for each state
+		calmState.enterActions.Add(StartRoaming);
+		calmState.stayActions.Add(Roam);
+		calmState.exitActions.Add(StopRoaming);
+		annoyedState.enterActions.Add(StartFleeing);
+		annoyedState.stayActions.Add(Flee);
+		annoyedState.exitActions.Add(StopFleeing);
+		replenishState.enterActions.Add(StartReplenishing);
+		replenishState.stayActions.Add(Replenish);
+		replenishState.exitActions.Add(StopReplenishing);
+		angryState.enterActions.Add(StartChaseToHit);
+		angryState.stayActions.Add(ChaseToHit);
+		angryState.exitActions.Add(StopChaseToHit);
+		berserkState.enterActions.Add(StartChaseToKill);
+		berserkState.stayActions.Add(ChaseToKill);
+		berserkState.exitActions.Add(StopChaseToKill);
+
+
 		monsterFSM = new FSM(calmState);
 
 		StartCoroutine(UpdateFSM());
@@ -187,4 +229,92 @@ public class MonsterBehaviour : MonoBehaviour
 		return false;
 	}
 	
+	// Actions
+
+	public void StartRoaming() {
+		isRoaming = true;
+		currentSpeed = roamSpeed;
+		currentState = MonsterState.calm;
+	}
+
+	// Function for free map roaming
+	public void Roam() {
+	
+	}
+
+	public void StopRoaming() {
+		isRoaming = false;
+	}
+
+	public void StartFleeing() {
+		isFleeing = true;
+		currentSpeed = fleeSpeed;
+		currentState = MonsterState.annoyed;
+	}
+
+	public void Flee() {
+		//Debug.Log("Chasing");
+	}
+
+	public void StopFleeing() {
+		isFleeing = false;
+		if (isAttacking) {
+			isAttacking = false;
+		}
+	}
+
+	public void StartChaseToHit() {
+		isChasing = true;
+		currentSpeed = chaseSpeed;
+		currentState = MonsterState.angry;
+	}
+
+	public void ChaseToHit() {
+		//Debug.Log("Chasing");
+	}
+
+	public void StopChaseToHit() {
+		isChasing = false;
+		if (isAttacking) {
+			isAttacking = false;
+		}
+	}
+
+	public void StartChaseToKill() {
+		isChasingBerserk = true;
+		currentSpeed = berserkSpeed;
+		currentState = MonsterState.berserk;
+	}
+
+	public void ChaseToKill() {
+		//Debug.Log("Chasing");
+	}
+
+	public void StopChaseToKill() {
+		isChasingBerserk = false;
+		if (isAttacking) {
+			isAttacking = false;
+		}
+	}
+
+	public void StartReplenishing() {
+		isReplenishing = true;
+		currentSpeed = roamSpeed;
+		currentState = MonsterState.replenish;
+	}
+
+	public void Replenish() {
+		//Debug.Log("Replenishing");
+	}
+
+	public void StopReplenishing() {
+		if (isReplenishing) {
+			isReplenishing = false;
+		}
+		if (isHealing || isEating || isSleeping) {
+			isHealing = false;
+			isEating = false;
+			isSleeping = false;
+		}
+	}
 }
