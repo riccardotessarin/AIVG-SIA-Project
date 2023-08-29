@@ -58,8 +58,6 @@ public class FSMState: IDTNode {
 	public void Exit() { foreach (FSMAction a in exitActions) a(); }
 
 	// This is the method to walk the decision tree
-
-
 	public FSMState Walk()
 	{
 		return this;

@@ -3,10 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
+
 public class MonsterBehaviour : MonoBehaviour
 {
 
 	public GameObject player;
+
+	Rigidbody rb;
 
 	private float reactionTime = 1.5f;
 	
@@ -15,6 +19,10 @@ public class MonsterBehaviour : MonoBehaviour
 	private float chaseSpeed = 3f;
 	private float berserkSpeed = 5f;
 	private float currentSpeed;
+	private float stopAt;
+	private Vector3 targetRandomPosition;
+	private float time = 0f;
+	private float timeToTarget = 5f;
 
 	private float health = 100f;
 	private float hunger = 0f;
@@ -46,6 +54,9 @@ public class MonsterBehaviour : MonoBehaviour
 	private void Awake() {
 		currentState = MonsterState.calm;
 		currentSpeed = roamSpeed;
+		rb = GetComponent<Rigidbody>();
+		stopAt = 0.1f;
+		targetRandomPosition = new Vector3(20, 1, 20);
 	}
 
 	// Start is called before the first frame update
@@ -142,7 +153,7 @@ public class MonsterBehaviour : MonoBehaviour
 
 		// Define actions for each state
 		calmState.enterActions.Add(StartRoaming);
-		calmState.stayActions.Add(Roam);
+		//calmState.stayActions.Add(Roam);
 		calmState.exitActions.Add(StopRoaming);
 		annoyedState.enterActions.Add(StartFleeing);
 		annoyedState.stayActions.Add(Flee);
@@ -199,6 +210,12 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 	
 	
+	private void FixedUpdate() {
+		Roam();
+	}
+
+
+	
 	// Decisions
 
 	private object GoodPhysicalStatus(object o) {
@@ -239,7 +256,20 @@ public class MonsterBehaviour : MonoBehaviour
 
 	// Function for free map roaming
 	public void Roam() {
-	
+		Debug.Log("Roaming to destination...");
+
+		Vector3 verticalAdj = new Vector3(targetRandomPosition.x, transform.position.y, targetRandomPosition.z);
+		Vector3 toDestination = verticalAdj - transform.position;
+
+		if (stopAt > toDestination.magnitude || time > timeToTarget) {
+			targetRandomPosition = UnityEngine.Random.onUnitSphere*UnityEngine.Random.Range(10f, 20f);
+			time = 0f;
+		} else {
+			// we keep only option a
+			transform.LookAt(verticalAdj);
+			rb.MovePosition(rb.position + transform.forward * currentSpeed * Time.deltaTime);
+			time += Time.deltaTime;
+		}
 	}
 
 	public void StopRoaming() {
