@@ -417,6 +417,7 @@ GameObject:
   - component: {fileID: 1047335963}
   - component: {fileID: 1047335962}
   - component: {fileID: 1047335965}
+  - component: {fileID: 1047335966}
   m_Layer: 0
   m_Name: Monster
   m_TagString: Untagged
@@ -600,6 +601,26 @@ MonoBehaviour:
   brake: 20
   brakeAt: 10
   stopAt: 15
+--- !u!114 &1047335966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1047335955}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58be9b6a678e0c74980b7a381823d555, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetRandomPosition: {x: 20, y: 1, z: 20}
+  time: 0
+  timeToTarget: 5
+  gas: 3
+  steer: 30
+  brake: 20
+  brakeAt: 5
+  stopAt: 0.5
 --- !u!1 &1323387876
 GameObject:
   m_ObjectHideFlags: 0

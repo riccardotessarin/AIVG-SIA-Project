@@ -20,6 +20,7 @@ public class MonsterBehaviour : MonoBehaviour
 	AvoidBehaviourVolume avoidBehaviourVolume;
 	SeekBehaviour seekBehaviour;
 	FleeBehaviour fleeBehaviour;
+	FreeRoamingBehaviour freeRoamingBehaviour;
 
 	private float reactionTime = 1.5f;
 	
@@ -76,6 +77,7 @@ public class MonsterBehaviour : MonoBehaviour
 		avoidBehaviourVolume = GetComponent<AvoidBehaviourVolume>();
 		seekBehaviour = GetComponent<SeekBehaviour>();
 		fleeBehaviour = GetComponent<FleeBehaviour>();
+		freeRoamingBehaviour = GetComponent<FreeRoamingBehaviour>();
 
 		FSMState calmState = new FSMState("calm");
 		FSMState annoyedState = new FSMState("annoyed");
@@ -239,6 +241,7 @@ public class MonsterBehaviour : MonoBehaviour
 		{
 			case MonsterState.calm:
 				if (isRoaming) {
+					components.Add(freeRoamingBehaviour.GetAcceleration(status));
 					//Roam();
 				}
 				break;
@@ -274,8 +277,7 @@ public class MonsterBehaviour : MonoBehaviour
 
 		// if we have an acceleration, apply it
 		if (blendedAcceleration.magnitude != 0f) {
-			Driver.Steer(GetComponent<Rigidbody>(), status, blendedAcceleration,
-				          minLinearSpeed, maxLinearSpeed, maxAngularSpeed);
+			Driver.Steer(rb, status, blendedAcceleration, minLinearSpeed, maxLinearSpeed, maxAngularSpeed);
 		}
 	}
 
