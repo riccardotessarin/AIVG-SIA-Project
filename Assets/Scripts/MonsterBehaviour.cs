@@ -12,6 +12,15 @@ public class MonsterBehaviour : MonoBehaviour
 
 	Rigidbody rb;
 
+	public float minLinearSpeed = 0.5f;
+	public float maxLinearSpeed = 5f;
+	public float maxAngularSpeed = 5f;
+	private MovementStatus status;
+	DragBehaviour dragBehaviour;
+	AvoidBehaviourVolume avoidBehaviourVolume;
+	SeekBehaviour seekBehaviour;
+	FleeBehaviour fleeBehaviour;
+
 	private float reactionTime = 1.5f;
 	
 	private float roamSpeed = 1f;
@@ -62,6 +71,12 @@ public class MonsterBehaviour : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
 	{
+		status = new MovementStatus ();
+		dragBehaviour = GetComponent<DragBehaviour>();
+		avoidBehaviourVolume = GetComponent<AvoidBehaviourVolume>();
+		seekBehaviour = GetComponent<SeekBehaviour>();
+		fleeBehaviour = GetComponent<FleeBehaviour>();
+
 		FSMState calmState = new FSMState("calm");
 		FSMState annoyedState = new FSMState("annoyed");
 		FSMState replenishState = new FSMState("replenish");
@@ -211,7 +226,57 @@ public class MonsterBehaviour : MonoBehaviour
 	
 	
 	private void FixedUpdate() {
-		Roam();
+		status.movementDirection = transform.forward;
+
+		// Contact al behaviours and build a list of directions
+		List<Vector3> components = new List<Vector3>();
+		
+		components.Add(dragBehaviour.GetAcceleration(status));
+		components.Add(avoidBehaviourVolume.GetAcceleration(status));
+		
+		
+		switch (currentState)
+		{
+			case MonsterState.calm:
+				if (isRoaming) {
+					//Roam();
+				}
+				break;
+			case MonsterState.annoyed:
+				if (isFleeing) {
+					components.Add(fleeBehaviour.GetAcceleration(status));
+					Flee();
+				}
+				break;
+			case MonsterState.angry:
+				if (isChasing) {
+					components.Add(seekBehaviour.GetAcceleration(status));
+					ChaseToHit();
+				}
+				break;
+			case MonsterState.berserk:
+				if (isChasingBerserk) {
+					components.Add(seekBehaviour.GetAcceleration(status));
+					ChaseToKill();
+				}
+				break;
+			case MonsterState.replenish:
+				if (isReplenishing) {
+					Replenish();
+				}
+				break;
+			default:
+				break;
+		}
+
+		// Blend the list to obtain a single acceleration to apply
+		Vector3 blendedAcceleration = Blender.Blend(components);
+
+		// if we have an acceleration, apply it
+		if (blendedAcceleration.magnitude != 0f) {
+			Driver.Steer(GetComponent<Rigidbody>(), status, blendedAcceleration,
+				          minLinearSpeed, maxLinearSpeed, maxAngularSpeed);
+		}
 	}
 
 
