@@ -21,6 +21,7 @@ public class MonsterBehaviour : MonoBehaviour
 	SeekBehaviour seekBehaviour;
 	FleeBehaviour fleeBehaviour;
 	FreeRoamingBehaviour freeRoamingBehaviour;
+	SeekRestoreBehaviour seekRestoreBehaviour;
 
 	private float reactionTime = 1.5f;
 	
@@ -78,6 +79,7 @@ public class MonsterBehaviour : MonoBehaviour
 		seekBehaviour = GetComponent<SeekBehaviour>();
 		fleeBehaviour = GetComponent<FleeBehaviour>();
 		freeRoamingBehaviour = GetComponent<FreeRoamingBehaviour>();
+		seekRestoreBehaviour = GetComponent<SeekRestoreBehaviour>();
 
 		FSMState calmState = new FSMState("calm");
 		FSMState annoyedState = new FSMState("annoyed");
@@ -176,7 +178,7 @@ public class MonsterBehaviour : MonoBehaviour
 		annoyedState.stayActions.Add(Flee);
 		annoyedState.exitActions.Add(StopFleeing);
 		replenishState.enterActions.Add(StartReplenishing);
-		replenishState.stayActions.Add(Replenish);
+		//replenishState.stayActions.Add(Replenish);
 		replenishState.exitActions.Add(StopReplenishing);
 		angryState.enterActions.Add(StartChaseToHit);
 		angryState.stayActions.Add(ChaseToHit);
@@ -265,7 +267,10 @@ public class MonsterBehaviour : MonoBehaviour
 				break;
 			case MonsterState.replenish:
 				if (isReplenishing) {
-					Replenish();
+					// Tries to reach the restoration point while also avoiding the player
+					components.Add(seekRestoreBehaviour.GetAcceleration(status));
+					components.Add(fleeBehaviour.GetAcceleration(status));
+					//Replenish();
 				}
 				break;
 			default:
@@ -339,6 +344,15 @@ public class MonsterBehaviour : MonoBehaviour
 		}
 	}
 
+	public void DecreaseAnger() {
+		if (stress > 0f) {
+			stress -= 1.0f;
+		}
+		if (grudge > 0f) {
+			grudge -= 0.1f;
+		}
+	}
+
 	public void StopRoaming() {
 		isRoaming = false;
 	}
@@ -401,7 +415,10 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	public void Replenish() {
-		//Debug.Log("Replenishing");
+		Debug.Log("Replenishing");
+		health = 100f;
+		hunger = 0f;
+		sleepiness = 0f;
 	}
 
 	public void StopReplenishing() {
