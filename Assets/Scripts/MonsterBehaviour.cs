@@ -175,28 +175,54 @@ public class MonsterBehaviour : MonoBehaviour
 		//calmState.stayActions.Add(Roam);
 		calmState.exitActions.Add(StopRoaming);
 		annoyedState.enterActions.Add(StartFleeing);
-		annoyedState.stayActions.Add(Flee);
+		annoyedState.stayActions.Add(IncreaseGrudge);
 		annoyedState.exitActions.Add(StopFleeing);
 		replenishState.enterActions.Add(StartReplenishing);
 		//replenishState.stayActions.Add(Replenish);
 		replenishState.exitActions.Add(StopReplenishing);
 		angryState.enterActions.Add(StartChaseToHit);
-		angryState.stayActions.Add(ChaseToHit);
+		angryState.stayActions.Add(IncreaseGrudge);
 		angryState.exitActions.Add(StopChaseToHit);
 		berserkState.enterActions.Add(StartChaseToKill);
-		berserkState.stayActions.Add(ChaseToKill);
+		berserkState.stayActions.Add(IncreaseGrudge);
 		berserkState.exitActions.Add(StopChaseToKill);
 
 
 		monsterFSM = new FSM(calmState);
 
 		StartCoroutine(UpdateFSM());
+		StartCoroutine(LivePhysicalStatus());
+		StartCoroutine(LiveMentalStatus());
 	}
 
 	public IEnumerator UpdateFSM() {
 		while (true) {
 			monsterFSM.Update();
 			yield return new WaitForSeconds(reactionTime);
+		}
+	}
+
+	public IEnumerator LivePhysicalStatus() {
+		while (true) {
+			if (hunger < 100f) {
+				hunger += 0.5f;
+			}
+			if (sleepiness < 100f) {
+				sleepiness += 0.5f;
+			}
+			yield return new WaitForSeconds(1f);
+		}
+	}
+
+	public IEnumerator LiveMentalStatus() {
+		while (true) {
+			if (stress > 0f) {
+				stress -= 1.0f;
+			}
+			if (grudge > 0f) {
+				grudge -= 0.1f;
+			}
+			yield return new WaitForSeconds(1f);
 		}
 	}
 
@@ -298,7 +324,7 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	private object GoodMentalStatus(object o) {
-		if (stress + grudge < 50f) {
+		if (stress < 10) {
 			return true;
 		}
 		return false;
@@ -344,15 +370,6 @@ public class MonsterBehaviour : MonoBehaviour
 		}
 	}
 
-	public void DecreaseAnger() {
-		if (stress > 0f) {
-			stress -= 1.0f;
-		}
-		if (grudge > 0f) {
-			grudge -= 0.1f;
-		}
-	}
-
 	public void StopRoaming() {
 		isRoaming = false;
 	}
@@ -365,6 +382,10 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void Flee() {
 		//Debug.Log("Chasing");
+	}
+
+	public void IncreaseGrudge() {
+		grudge = grudge + reactionTime > 100f ? 100f : grudge + reactionTime;
 	}
 
 	public void StopFleeing() {
