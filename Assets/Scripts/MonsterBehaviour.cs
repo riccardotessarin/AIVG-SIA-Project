@@ -19,7 +19,8 @@ public class MonsterBehaviour : MonoBehaviour
 	DragBehaviour dragBehaviour;
 	AvoidBehaviourVolume avoidBehaviourVolume;
 	SeekBehaviour seekBehaviour;
-	FleeBehaviour fleeBehaviour;
+	//FleeBehaviour fleeBehaviour;
+	FreeFleeBehaviour freeFleeBehaviour;
 	FreeRoamingBehaviour freeRoamingBehaviour;
 	SeekRestoreBehaviour seekRestoreBehaviour;
 
@@ -77,7 +78,8 @@ public class MonsterBehaviour : MonoBehaviour
 		dragBehaviour = GetComponent<DragBehaviour>();
 		avoidBehaviourVolume = GetComponent<AvoidBehaviourVolume>();
 		seekBehaviour = GetComponent<SeekBehaviour>();
-		fleeBehaviour = GetComponent<FleeBehaviour>();
+		//fleeBehaviour = GetComponent<FleeBehaviour>();
+		freeFleeBehaviour = GetComponent<FreeFleeBehaviour>();
 		freeRoamingBehaviour = GetComponent<FreeRoamingBehaviour>();
 		seekRestoreBehaviour = GetComponent<SeekRestoreBehaviour>();
 
@@ -275,7 +277,8 @@ public class MonsterBehaviour : MonoBehaviour
 				break;
 			case MonsterState.annoyed:
 				if (isFleeing) {
-					components.Add(fleeBehaviour.GetAcceleration(status));
+					components.Add(freeFleeBehaviour.GetAcceleration(status));
+					//components.Add(fleeBehaviour.GetAcceleration(status));
 					Flee();
 				}
 				break;
