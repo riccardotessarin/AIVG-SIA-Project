@@ -295,7 +295,6 @@ public class MonsterBehaviour : MonoBehaviour
 				if (isReplenishing) {
 					// Tries to reach the restoration point while also avoiding the player
 					components.Add(seekRestoreBehaviour.GetAcceleration(status));
-					components.Add(fleeBehaviour.GetAcceleration(status));
 					//Replenish();
 				}
 				break;

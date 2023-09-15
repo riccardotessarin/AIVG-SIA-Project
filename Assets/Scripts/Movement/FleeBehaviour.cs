@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FleeBehaviour : MovementBehaviour {
 
-	public Transform destination;
+	public Transform fleeFrom;
 
 	public float gas = 3f;
 	public float steer = 30f;
@@ -14,8 +14,8 @@ public class FleeBehaviour : MovementBehaviour {
 	public float stopAt = 15f;
 
 	public override Vector3 GetAcceleration (MovementStatus status) {
-		if (destination != null) {
-			Vector3 verticalAdj = new Vector3 (destination.position.x, transform.position.y, destination.position.z);
+		if (fleeFrom != null) {
+			Vector3 verticalAdj = new Vector3 (fleeFrom.position.x, transform.position.y, fleeFrom.position.z);
 			Vector3 fromDestination = (transform.position - verticalAdj);
 
 			if (fromDestination.magnitude < stopAt) {
