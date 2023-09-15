@@ -26,21 +26,29 @@ public class MonsterBehaviour : MonoBehaviour
 
 	private float reactionTime = 1.5f;
 	
-	private float roamSpeed = 1f;
-	private float fleeSpeed = 3f;
-	private float chaseSpeed = 3f;
-	private float berserkSpeed = 5f;
+	private Dictionary<string, float> monsterSpeed = new Dictionary<string, float> {
+		{ "roam", 1f },
+		{ "flee", 3f },
+		{ "chase", 3f },
+		{ "berserk", 5f }
+	};
+
+	// TODO: modify speed and animation speed according to the state
 	private float currentSpeed;
-	private float stopAt;
-	private Vector3 targetRandomPosition;
-	private float time = 0f;
-	private float timeToTarget = 5f;
 
 	private float health = 100f;
 	private float hunger = 0f;
 	private float sleepiness = 0f;
 	private float stress = 0f;
 	private float grudge = 0f;
+
+	private Dictionary<MonsterState, float> rageMultiplier = new Dictionary<MonsterState, float> {
+		{ MonsterState.calm, 0.5f },
+		{ MonsterState.annoyed, 1f },
+		{ MonsterState.angry, 1.5f },
+		{ MonsterState.replenish, 2f },
+		{ MonsterState.berserk, 0.8f }
+	};
 
 	private FSM monsterFSM;
 
@@ -65,10 +73,8 @@ public class MonsterBehaviour : MonoBehaviour
 	
 	private void Awake() {
 		currentState = MonsterState.calm;
-		currentSpeed = roamSpeed;
+		currentSpeed = monsterSpeed["roam"];
 		rb = GetComponent<Rigidbody>();
-		stopAt = 0.1f;
-		targetRandomPosition = new Vector3(20, 1, 20);
 	}
 
 	// Start is called before the first frame update
@@ -82,6 +88,8 @@ public class MonsterBehaviour : MonoBehaviour
 		freeFleeBehaviour = GetComponent<FreeFleeBehaviour>();
 		freeRoamingBehaviour = GetComponent<FreeRoamingBehaviour>();
 		seekRestoreBehaviour = GetComponent<SeekRestoreBehaviour>();
+
+		#region FSM setup
 
 		FSMState calmState = new FSMState("calm");
 		FSMState annoyedState = new FSMState("annoyed");
@@ -174,21 +182,22 @@ public class MonsterBehaviour : MonoBehaviour
 
 		// Define actions for each state
 		calmState.enterActions.Add(StartRoaming);
-		//calmState.stayActions.Add(Roam);
 		calmState.exitActions.Add(StopRoaming);
 		annoyedState.enterActions.Add(StartFleeing);
 		annoyedState.stayActions.Add(IncreaseGrudge);
 		annoyedState.exitActions.Add(StopFleeing);
 		replenishState.enterActions.Add(StartReplenishing);
-		//replenishState.stayActions.Add(Replenish);
 		replenishState.exitActions.Add(StopReplenishing);
-		angryState.enterActions.Add(StartChaseToHit);
+		angryState.enterActions.Add(StartAngry);
 		angryState.stayActions.Add(IncreaseGrudge);
-		angryState.exitActions.Add(StopChaseToHit);
-		berserkState.enterActions.Add(StartChaseToKill);
+		angryState.stayActions.Add(AngryAttack);
+		angryState.exitActions.Add(StopAngry);
+		berserkState.enterActions.Add(StartBerserk);
 		berserkState.stayActions.Add(IncreaseGrudge);
-		berserkState.exitActions.Add(StopChaseToKill);
+		berserkState.stayActions.Add(BerserkAttack);
+		berserkState.exitActions.Add(StopBerserk);
 
+		#endregion
 
 		monsterFSM = new FSM(calmState);
 
@@ -272,33 +281,28 @@ public class MonsterBehaviour : MonoBehaviour
 			case MonsterState.calm:
 				if (isRoaming) {
 					components.Add(freeRoamingBehaviour.GetAcceleration(status));
-					//Roam();
 				}
 				break;
 			case MonsterState.annoyed:
 				if (isFleeing) {
+					// Continues free roaming while also avoiding the player
 					components.Add(freeFleeBehaviour.GetAcceleration(status));
-					//components.Add(fleeBehaviour.GetAcceleration(status));
-					Flee();
 				}
 				break;
 			case MonsterState.angry:
 				if (isChasing) {
 					components.Add(seekBehaviour.GetAcceleration(status));
-					ChaseToHit();
 				}
 				break;
 			case MonsterState.berserk:
 				if (isChasingBerserk) {
 					components.Add(seekBehaviour.GetAcceleration(status));
-					ChaseToKill();
 				}
 				break;
 			case MonsterState.replenish:
 				if (isReplenishing) {
 					// Tries to reach the restoration point while also avoiding the player
 					components.Add(seekRestoreBehaviour.GetAcceleration(status));
-					//Replenish();
 				}
 				break;
 			default:
@@ -316,7 +320,7 @@ public class MonsterBehaviour : MonoBehaviour
 
 
 	
-	// Decisions
+	#region Decisions
 
 	private object GoodPhysicalStatus(object o) {
 		if (health > 20f && hunger < 80f && sleepiness < 80f) {
@@ -345,16 +349,33 @@ public class MonsterBehaviour : MonoBehaviour
 		}
 		return false;
 	}
+
+	private bool PlayerInAttackRange() {
+		if (Vector3.Distance(transform.position, player.transform.position) < 2f) {
+			return true;
+		}
+		return false;
+	}
+
+	#endregion
 	
-	// Actions
+	#region Actions
 
 	public void StartRoaming() {
 		isRoaming = true;
-		currentSpeed = roamSpeed;
+		currentSpeed = monsterSpeed["roam"];
 		currentState = MonsterState.calm;
 	}
 
+	/*
+
 	// Function for free map roaming
+
+	private float stopAt = 0.1f;
+	private Vector3 targetRandomPosition = new Vector3(20, 1, 20);
+	private float time = 0f;
+	private float timeToTarget = 5f;
+
 	public void Roam() {
 		Debug.Log("Roaming to destination...");
 
@@ -372,13 +393,15 @@ public class MonsterBehaviour : MonoBehaviour
 		}
 	}
 
+	*/
+
 	public void StopRoaming() {
 		isRoaming = false;
 	}
 
 	public void StartFleeing() {
 		isFleeing = true;
-		currentSpeed = fleeSpeed;
+		currentSpeed = monsterSpeed["flee"];
 		currentState = MonsterState.annoyed;
 	}
 
@@ -397,34 +420,46 @@ public class MonsterBehaviour : MonoBehaviour
 		}
 	}
 
-	public void StartChaseToHit() {
+	public void StartAngry() {
 		isChasing = true;
-		currentSpeed = chaseSpeed;
+		currentSpeed = monsterSpeed["chase"];
 		currentState = MonsterState.angry;
 	}
 
-	public void ChaseToHit() {
-		//Debug.Log("Chasing");
+	public void AngryAttack() {
+		if(PlayerInAttackRange()) {
+			Attack();
+			// Decrease stress by 20% and grudge by 10%
+			// FSM will take care of the transition to the calm state
+			stress *= 0.8f;
+			grudge *= 0.9f;
+		}
 	}
 
-	public void StopChaseToHit() {
+	public void StopAngry() {
 		isChasing = false;
 		if (isAttacking) {
 			isAttacking = false;
 		}
 	}
 
-	public void StartChaseToKill() {
+	public void StartBerserk() {
 		isChasingBerserk = true;
-		currentSpeed = berserkSpeed;
+		currentSpeed = monsterSpeed["berserk"];
 		currentState = MonsterState.berserk;
 	}
 
-	public void ChaseToKill() {
-		//Debug.Log("Chasing");
+	public void BerserkAttack() {
+		if(PlayerInAttackRange()) {
+			Attack();
+			// Decrease stress by 10% and grudge by 5%
+			// FSM will take care to transition back to the replenish state
+			stress *= 0.9f;
+			grudge *= 0.95f;
+		}
 	}
 
-	public void StopChaseToKill() {
+	public void StopBerserk() {
 		isChasingBerserk = false;
 		if (isAttacking) {
 			isAttacking = false;
@@ -433,7 +468,7 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StartReplenishing() {
 		isReplenishing = true;
-		currentSpeed = roamSpeed;
+		currentSpeed = monsterSpeed["roam"];
 		currentState = MonsterState.replenish;
 	}
 
@@ -454,4 +489,23 @@ public class MonsterBehaviour : MonoBehaviour
 			isSleeping = false;
 		}
 	}
+
+	public void Attack() {
+		Debug.Log("Attacking");
+		isAttacking = true;
+		// TODO: send damage to player
+		// TODO: play attack animation
+		isAttacking = false;
+	}
+
+	public void TakeDamage(float damage, float stressDamage, float grudgeDamage) {
+		// Only for demo purposes, the monster can't die
+		health = health - damage < 0f ? 0f : health - damage;
+		stressDamage *= rageMultiplier[currentState];
+		grudgeDamage *= rageMultiplier[currentState];
+		stress = stress + stressDamage > 100f ? 100f : stress + stressDamage;
+		grudge = grudge + grudgeDamage > 100f ? 100f : grudge + grudgeDamage;
+	}
+
+	#endregion
 }
