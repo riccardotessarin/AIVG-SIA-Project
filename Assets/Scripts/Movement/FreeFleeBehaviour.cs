@@ -19,8 +19,6 @@ public class FreeFleeBehaviour : MovementBehaviour {
 	public float fleeRange = 10f;
 
     public override Vector3 GetAcceleration(MovementStatus status) {
-		Debug.Log("Roaming to destination...");
-
         if (targetRandomPosition != null) {
 			Vector3 verticalAdj = new Vector3(targetRandomPosition.x, transform.position.y, targetRandomPosition.z);
 			Vector3 toDestination = verticalAdj - transform.position;

@@ -15,8 +15,6 @@ public class FreeRoamingBehaviour : MovementBehaviour {
 	public float stopAt = 0.01f;
 
     public override Vector3 GetAcceleration(MovementStatus status) {
-		Debug.Log("Roaming to destination...");
-
         if (targetRandomPosition != null) {
 			Vector3 verticalAdj = new Vector3(targetRandomPosition.x, transform.position.y, targetRandomPosition.z);
 			Vector3 toDestination = verticalAdj - transform.position;
@@ -37,6 +35,11 @@ public class FreeRoamingBehaviour : MovementBehaviour {
 			return Vector3.zero;
 		}
     }
+	
+
+	public void ResetTargetRandomPosition(Transform newTarget) {
+		targetRandomPosition = new Vector3(newTarget.position.x, transform.position.y, newTarget.position.z);
+	}
 }
 
 /*

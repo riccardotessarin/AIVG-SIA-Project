@@ -67,11 +67,13 @@ public class MonsterBehaviour : MonoBehaviour
 	private bool isChasing = false;
 	private bool isChasingBerserk = false;
 	private bool isAttacking = false;
+	private float maxPlayerDistance = 10f;
+	private float maxattackRange = 2f;
 
 	private enum MonsterState { calm, annoyed, replenish, angry, berserk };
 	private MonsterState currentState;
 	
-	private void Awake() {
+    private void Awake() {
 		currentState = MonsterState.calm;
 		currentSpeed = monsterSpeed["roam"];
 		rb = GetComponent<Rigidbody>();
@@ -160,10 +162,12 @@ public class MonsterBehaviour : MonoBehaviour
 		// From berserk state
 		//DTDecision berserkd2 = new DTDecision(GoodPhysicalStatus);
 		DTDecision berserkd1 = new DTDecision(GoodMentalStatus);
-		//DTDecision berserkd3 = new DTDecision(PlayerInRange);
+		DTDecision berserkd2 = new DTDecision(PlayerInRange);
 
 		// Define links between decisions
 		berserkd1.AddLink(true, replenishState);
+		berserkd1.AddLink(false, berserkd2);
+		berserkd2.AddLink(false, replenishState);
 		//berserkd1.AddLink(false, berserkState); // NOTE: if we want to stay in the same state, we don't need to add a link
 
 		// Setup my DecisionTree at the root node
@@ -290,13 +294,19 @@ public class MonsterBehaviour : MonoBehaviour
 				}
 				break;
 			case MonsterState.angry:
-				if (isChasing) {
+				if (isChasing && CanSeePlayer()) {
 					components.Add(seekBehaviour.GetAcceleration(status));
+				} else {
+					// Continues free roaming
+					components.Add(freeRoamingBehaviour.GetAcceleration(status));
 				}
 				break;
 			case MonsterState.berserk:
-				if (isChasingBerserk) {
+				if (isChasingBerserk && CanSeePlayer()) {
 					components.Add(seekBehaviour.GetAcceleration(status));
+				} else {
+					// Continues free roaming
+					components.Add(freeRoamingBehaviour.GetAcceleration(status));
 				}
 				break;
 			case MonsterState.replenish:
@@ -337,7 +347,7 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	private object PlayerInRange(object o) {
-		if (Vector3.Distance(transform.position, player.transform.position) < 10f) {
+		if (Vector3.Distance(transform.position, player.transform.position) < maxPlayerDistance) {
 			return true;
 		}
 		return false;
@@ -351,8 +361,31 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	private bool PlayerInAttackRange() {
-		if (Vector3.Distance(transform.position, player.transform.position) < 2f) {
+		if (Vector3.Distance(transform.position, player.transform.position) < maxattackRange) {
 			return true;
+		}
+		return false;
+	}
+	
+	private bool sensedPlayer = false;
+
+	private bool CanSeePlayer(){
+		RaycastHit hit;
+		Vector3 rayDirection = player.transform.position - transform.position;
+		if (Physics.Raycast(transform.position, rayDirection, out hit, maxPlayerDistance)
+				&& Vector3.Angle(rayDirection, transform.forward) < 90f) {
+			if (hit.collider.gameObject == player) {
+				Debug.DrawRay(transform.position, rayDirection, Color.green);
+				sensedPlayer = true;
+				return true;
+			}
+		}
+		Debug.DrawRay(transform.position, rayDirection, Color.red);
+
+		// If we saw the player at least once, we start by going to the last known position
+		if (sensedPlayer) {
+			sensedPlayer = false;
+			freeRoamingBehaviour.ResetTargetRandomPosition(player.transform);
 		}
 		return false;
 	}
