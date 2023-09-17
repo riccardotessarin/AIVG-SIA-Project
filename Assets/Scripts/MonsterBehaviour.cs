@@ -14,10 +14,7 @@ public class MonsterBehaviour : MonoBehaviour
 
 	private Animator animator;
 
-	public float minLinearSpeed = 0.5f;
-	public float maxLinearSpeed = 5f;
-	public float maxAngularSpeed = 5f;
-	private MovementStatus status;
+	
 	DragBehaviour dragBehaviour;
 	AvoidBehaviourVolume avoidBehaviourVolume;
 	SeekBehaviour seekBehaviour;
@@ -30,13 +27,16 @@ public class MonsterBehaviour : MonoBehaviour
 	
 	private Dictionary<string, float> monsterSpeed = new Dictionary<string, float> {
 		{ "roam", 1f },
-		{ "flee", 3f },
-		{ "chase", 3f },
-		{ "berserk", 5f }
+		{ "flee", 2.5f },
+		{ "chase", 5f },
+		{ "berserk", 8f }
 	};
 
-	// TODO: modify speed and animation speed according to the state
-	private float currentSpeed;
+	public float minLinearSpeed = 0.5f;
+	public float currentSpeed;
+	//public float maxLinearSpeed = 5f;
+	//public float maxAngularSpeed = 5f;
+	private MovementStatus status;
 
 	private float health = 100f;
 	private float hunger = 0f;
@@ -153,14 +153,16 @@ public class MonsterBehaviour : MonoBehaviour
 		DTDecision angryd1 = new DTDecision(GoodPhysicalStatus);
 		DTDecision angryd2 = new DTDecision(GoodMentalStatus);
 		DTDecision angryd3 = new DTDecision(PlayerInRange);
+		DTDecision angryd4 = new DTDecision(IsAngry);
 
 		// Define links between decisions
 		angryd1.AddLink(true, angryd2);
 		angryd1.AddLink(false, angryd3);
 		angryd2.AddLink(true, calmState);
-		//angryd2.AddLink(false, angryState); // NOTE: if we want to stay in the same state, we don't need to add a link
+		angryd2.AddLink(false, angryd4);
 		angryd3.AddLink(true, berserkState);
 		angryd3.AddLink(false, replenishState);
+		angryd4.AddLink(false, annoyedState);
 
 		// From berserk state
 		//DTDecision berserkd2 = new DTDecision(GoodPhysicalStatus);
@@ -234,12 +236,8 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public IEnumerator LiveMentalStatus() {
 		while (true) {
-			if (stress > 0f) {
-				stress -= 1.0f;
-			}
-			if (grudge > 0f) {
-				grudge -= 0.1f;
-			}
+			stress = stress - 1.0f > 0f ? stress - 1.0f : 0f;
+			grudge = grudge - 0.1f > 0f ? grudge - 0.1f : 0f;
 			yield return new WaitForSeconds(1f);
 		}
 	}
@@ -334,7 +332,8 @@ public class MonsterBehaviour : MonoBehaviour
 
 		// if we have an acceleration, apply it
 		if (blendedAcceleration.magnitude != 0f) {
-			Driver.Steer(rb, status, blendedAcceleration, minLinearSpeed, maxLinearSpeed, maxAngularSpeed);
+			Driver.Steer(rb, status, blendedAcceleration, minLinearSpeed, currentSpeed, currentSpeed);
+			//Driver.Steer(rb, status, blendedAcceleration, minLinearSpeed, maxLinearSpeed, maxAngularSpeed);
 		}
 	}
 
@@ -513,7 +512,7 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StartReplenishing() {
 		isReplenishing = true;
-		currentSpeed = monsterSpeed["roam"];
+		currentSpeed = monsterSpeed["flee"];
 		currentState = MonsterState.replenish;
 	}
 
@@ -538,8 +537,8 @@ public class MonsterBehaviour : MonoBehaviour
 	public void Attack() {
 		Debug.Log("Attacking");
 		isAttacking = true;
-		// TODO: send damage to player
-		// TODO: play attack animation
+		player.GetComponent<PlayerBehaviour>().TakeDamage(10f);
+		animator.SetTrigger("isAttacking");
 		isAttacking = false;
 	}
 

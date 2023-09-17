@@ -8,7 +8,7 @@ public class SeekBehaviour : MovementBehaviour {
 	public float steer = 30f;
 	public float brake = 20f;
 
-	public float brakeAt = 5f;
+	public float brakeAt = 1f;
 	public float stopAt = 0.01f;
 
 	public override Vector3 GetAcceleration (MovementStatus status) {
