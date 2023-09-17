@@ -1,5 +1,7 @@
 /*
 !.gitignore
 !Assets
+/Assets/Downloaded/
+/Assets/Downloaded.meta
 !ProjectSettings
 !Packages

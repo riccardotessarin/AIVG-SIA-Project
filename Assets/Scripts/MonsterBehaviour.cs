@@ -10,7 +10,9 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public GameObject player;
 
-	Rigidbody rb;
+	private Rigidbody rb;
+
+	private Animator animator;
 
 	public float minLinearSpeed = 0.5f;
 	public float maxLinearSpeed = 5f;
@@ -77,6 +79,7 @@ public class MonsterBehaviour : MonoBehaviour
 		currentState = MonsterState.calm;
 		currentSpeed = monsterSpeed["roam"];
 		rb = GetComponent<Rigidbody>();
+		animator = GetComponent<Animator>();
 	}
 
 	// Start is called before the first frame update
@@ -245,6 +248,13 @@ public class MonsterBehaviour : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
+		if (status.linearSpeed > 3f) {
+			animator.SetBool("isRunning", true);
+		} else {
+			animator.SetBool("isRunning", false);
+		}
+
+
 		if (Input.GetKeyDown(KeyCode.Return)) {
 			Debug.Log("Current stats: " + health + " " + hunger + " " + sleepiness + " " + stress + " " + grudge);
 		}
@@ -371,16 +381,18 @@ public class MonsterBehaviour : MonoBehaviour
 
 	private bool CanSeePlayer(){
 		RaycastHit hit;
-		Vector3 rayDirection = player.transform.position - transform.position;
-		if (Physics.Raycast(transform.position, rayDirection, out hit, maxPlayerDistance)
+		Vector3 headPosition = transform.GetChild(2).position;
+		Vector3 playerHeadPosition = player.transform.GetChild(2).position;
+		Vector3 rayDirection = playerHeadPosition - headPosition;
+		if (Physics.Raycast(headPosition, rayDirection, out hit, maxPlayerDistance)
 				&& Vector3.Angle(rayDirection, transform.forward) < 90f) {
 			if (hit.collider.gameObject == player) {
-				Debug.DrawRay(transform.position, rayDirection, Color.green);
+				Debug.DrawRay(headPosition, rayDirection, Color.green);
 				sensedPlayer = true;
 				return true;
 			}
 		}
-		Debug.DrawRay(transform.position, rayDirection, Color.red);
+		Debug.DrawRay(headPosition, rayDirection, Color.red);
 
 		// If we saw the player at least once, we start by going to the last known position
 		if (sensedPlayer) {
