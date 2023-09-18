@@ -194,6 +194,7 @@ public class MonsterBehaviour : MonoBehaviour
 		calmState.exitActions.Add(StopRoaming);
 		annoyedState.enterActions.Add(StartFleeing);
 		annoyedState.stayActions.Add(IncreaseGrudge);
+		annoyedState.stayActions.Add(Flee);
 		annoyedState.exitActions.Add(StopFleeing);
 		replenishState.enterActions.Add(StartReplenishing);
 		replenishState.exitActions.Add(StopReplenishing);
@@ -451,6 +452,13 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void Flee() {
 		//Debug.Log("Chasing");
+		if (freeFleeBehaviour.PlayerInRange()) {
+			//Debug.Log("Player in range");
+			currentSpeed = Mathf.Lerp(monsterSpeed["flee"], monsterSpeed["flee"]*2, freeFleeBehaviour.GetPercentage());
+		} else {
+			//Debug.Log("Player not in range");
+			currentSpeed = monsterSpeed["flee"];
+		}
 	}
 
 	public void IncreaseGrudge() {

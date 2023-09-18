@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class FreeFleeBehaviour : MovementBehaviour {
@@ -16,7 +17,9 @@ public class FreeFleeBehaviour : MovementBehaviour {
 	public float brakeAt = 5f;
 	public float stopAt = 0.01f;
 
-	public float fleeRange = 10f;
+	public float fleeRange = 5f;
+	private bool inRange = false;
+	private float percentage = 0f;
 
     public override Vector3 GetAcceleration(MovementStatus status) {
         if (targetRandomPosition != null) {
@@ -41,16 +44,28 @@ public class FreeFleeBehaviour : MovementBehaviour {
 					Vector3 tanComponent = Vector3.Project (fromDest.normalized, status.movementDirection);
 					Vector3 normComponent = (fromDest.normalized - tanComponent);
 					fleeAdj = (tanComponent * gas) + (normComponent * steer);
+					inRange = true;
+					percentage = 1 - (fromDest.magnitude / fleeRange);
 				} else {
+					inRange = false;
 					fleeAdj = Vector3.zero;
 				}
 				return fleeAdj + ((tangentComponent * gas) + (normalComponent * steer));
 				//return fleeAdj + ((tangentComponent * (toDestination.magnitude > brakeAt ? gas : -brake)) + (normalComponent * steer));
 			} else {
-				return (tangentComponent * (toDestination.magnitude > brakeAt ? gas : -brake)) + (normalComponent * steer);
+				return (tangentComponent * gas) + (normalComponent * steer);
+				//return (tangentComponent * (toDestination.magnitude > brakeAt ? gas : -brake)) + (normalComponent * steer);
 			}
 		} else {
 			return Vector3.zero;
 		}
     }
+
+	public bool PlayerInRange(){
+		return inRange;
+	}
+
+	public float GetPercentage(){
+		return percentage;
+	}
 }
