@@ -9,6 +9,22 @@ public class MovementStatus {
 
 // To be extended by all movement behaviours
 public abstract class MovementBehaviour : MonoBehaviour {
+	protected float sightRange;
+	protected float sightAngle;
+	public float steer; // Maybe make it 30 for avoid behaviour volume
+	protected float backpedal;
+
+	/// <summary>
+	/// Awake is called when the script instance is being loaded.
+	/// </summary>
+	void Awake()
+	{
+		sightRange = GameManager.Instance.sightRange;
+		sightAngle = GameManager.Instance.sightAngle;
+		steer = GameManager.Instance.steer;
+		backpedal = GameManager.Instance.backpedal;
+	}
+
 	public abstract Vector3 GetAcceleration (MovementStatus status);
 }
 

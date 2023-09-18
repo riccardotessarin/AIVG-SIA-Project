@@ -4,14 +4,16 @@ using UnityEngine;
 
 public class FleeBehaviour : MovementBehaviour {
 
+	
 	public Transform fleeFrom;
 
 	public float gas = 3f;
-	public float steer = 30f;
+	//public float steer = 30f;
 	public float brake = 20f;
 
 	public float brakeAt = 10f;
 	public float stopAt = 15f;
+	
 
 	public override Vector3 GetAcceleration (MovementStatus status) {
 		if (fleeFrom != null) {

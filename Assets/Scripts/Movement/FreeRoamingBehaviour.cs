@@ -8,7 +8,7 @@ public class FreeRoamingBehaviour : MovementBehaviour {
 	private float timeToTarget = 5f;
 
 	public float gas = 3f;
-	public float steer = 30f;
+	//public float steer = 30f;
 	public float brake = 20f;
 
 	public float brakeAt = 5f;
