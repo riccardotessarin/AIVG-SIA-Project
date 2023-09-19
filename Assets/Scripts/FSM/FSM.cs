@@ -42,6 +42,14 @@ public class FSM {
 	public void Update() {
 		//Debug.Log("Current state: " + current.stateName + "");
 		//DecisionTree transition = current.VerifyTransitions ();
+		if (current.transionTree.walk() is FSMState transition && transition != current) {
+			current.Exit();
+			current = transition;
+			current.Enter();
+			Debug.Log("New state: " + current.stateName + "");
+		}
+		current.Stay();
+		/*
 		FSMState transition = current.transionTree.walk();
 		if (transition != null) {
 			current.Exit();		// 1
@@ -53,5 +61,6 @@ public class FSM {
 		} else {
 			current.Stay();		// 5
 		}
+		*/
 	}
 }

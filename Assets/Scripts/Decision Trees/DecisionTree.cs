@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public interface IDTNode {
 	//DTAction Walk();
 	FSMState Walk();
+	IDTNode WalkNonRecursive();
 }
 
 // This delegate will defer functions to both
@@ -40,6 +41,19 @@ public class DTDecision : IDTNode {
 		object o = Selector(null);
 		return links.ContainsKey(o) ? links[o].Walk() : null;
 	}
+
+	// Non-recursive version of Walk
+	public IDTNode WalkNonRecursive() {
+		IDTNode current = this;
+		while (current is DTDecision decision) {
+			DTDecision d = decision;
+			object o = d.Selector(null);
+			if (!d.links.ContainsKey(o)) return null;
+			current = d.links[o];
+		}
+		return current;
+	}
+
 }
 
 // Action node
@@ -72,8 +86,11 @@ public class DecisionTree {
 	// Walk the structure and call the resulting action (if any)
 	// a null means no action is required.
 	public FSMState walk() {
-		FSMState result = root.Walk();
-		if (result != null) return result;
+		//FSMState result = root.Walk();
+		//if (result != null) return result;
+		if (root.WalkNonRecursive() is FSMState result) {
+			return result;
+		}
 		return null;
 	}
 }

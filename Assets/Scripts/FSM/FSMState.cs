@@ -62,4 +62,9 @@ public class FSMState: IDTNode {
 	{
 		return this;
 	}
+
+	public IDTNode WalkNonRecursive()
+	{
+		return this;
+	}
 }
