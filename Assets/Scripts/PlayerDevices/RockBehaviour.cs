@@ -16,10 +16,10 @@ public class RockBehaviour : MonoBehaviour
 
 	// This function destroys the device after a certain time if it doesn't hit anything
 	private IEnumerator WaitAndDestroy(float waitTime) {
-		while (true) {
-			yield return new WaitForSecondsRealtime(waitTime);
-			Destroy(gameObject);
-		}
+		//while (true) {
+		yield return new WaitForSecondsRealtime(waitTime);
+		Destroy(gameObject);
+		//}
 	}
 
 	// Start is called before the first frame update

@@ -6,13 +6,21 @@ public class FreeFleeBehaviour : MovementBehaviour {
 	public Transform fleeFrom;
 
 	//public Transform destination;
-	public Vector3 targetRandomPosition = new Vector3(20, 1, 20);
+	[SerializeField]
+	private Vector3 targetRandomPosition = new Vector3(20, 1, 20);
+	[SerializeField]
+	private Vector3 lastSeenPosition = new Vector3(20, 1, 20);
 	private float time = 0f;
 	private float timeToTarget = 5f;
 	private bool inRange = false;
 	private float percentage = 0f;
 	[SerializeField]
 	private bool isFleeing = false;
+	[SerializeField]
+	private bool isSeeking = false;
+	private float minRange = 0f;
+	private float maxRange = 20f;
+	private float maxTargetedRange = 3f;
 
 	/*
 	public float gas = 3f;
@@ -33,7 +41,7 @@ public class FreeFleeBehaviour : MovementBehaviour {
 			
 			if (stopAt > toDestination.magnitude || time > timeToTarget) {
 				Debug.Log("Reached destination, new destination...");
-				targetRandomPosition = Random.onUnitSphere*Random.Range(10f, 20f);
+				targetRandomPosition = GetRandomPosition();
 				time = 0f;
 			}
 
@@ -73,8 +81,21 @@ public class FreeFleeBehaviour : MovementBehaviour {
 		}
     }
 
-	public void ResetTargetRandomPosition(Transform newTarget) {
+	public Vector3 GetRandomPosition(){
+		if (isSeeking) {
+			Debug.Log("Seeking targeted...");
+
+			return lastSeenPosition + Random.onUnitSphere*Random.Range(minRange, maxTargetedRange);
+		}
+		return Random.onUnitSphere*Random.Range(10f, maxRange);
+	}
+
+	public void ResetTargetRandomPosition(Transform newTarget, bool seeking = false) {
 		targetRandomPosition = new Vector3(newTarget.position.x, transform.position.y, newTarget.position.z);
+		if (seeking) {
+			isSeeking = true;
+			lastSeenPosition = targetRandomPosition;
+		}
 	}
 
 	public bool PlayerInRange(){
@@ -87,6 +108,12 @@ public class FreeFleeBehaviour : MovementBehaviour {
 
 	public void SetIsFleeing(bool flee){
 		isFleeing = flee;
+	}
+
+	public void SetIsSeeking(bool seek){
+		Debug.Log("Giving up seeking...");
+
+		isSeeking = seek;
 	}
 
 	private Vector3 GetFleeAcceleration(MovementStatus status){

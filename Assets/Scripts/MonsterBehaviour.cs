@@ -378,6 +378,8 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 	
 	private bool sensedPlayer = false;
+	private float maxSeekTime = 15f;
+	private Coroutine seekCoroutine = null;
 
 	private bool CanSeePlayer(){
 		RaycastHit hit;
@@ -396,10 +398,19 @@ public class MonsterBehaviour : MonoBehaviour
 
 		// If we saw the player at least once, we start by going to the last known position
 		if (sensedPlayer) {
+			if (seekCoroutine != null) { StopCoroutine(seekCoroutine); }
 			sensedPlayer = false;
-			freeFleeBehaviour.ResetTargetRandomPosition(player.transform);
+			freeFleeBehaviour.ResetTargetRandomPosition(player.transform, true);
+			seekCoroutine = StartCoroutine(TargetedSeeking(maxSeekTime));
 		}
 		return false;
+	}
+
+	// This function destroys the device after a certain time if it doesn't hit anything
+	private IEnumerator TargetedSeeking(float giveUpTime) {
+		Debug.Log("Start seeking targeted...");
+		yield return new WaitForSecondsRealtime(giveUpTime);
+		freeFleeBehaviour.SetIsSeeking(false);
 	}
 
 	#endregion
@@ -492,6 +503,8 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StopAngry() {
 		isChasing = false;
+		if (seekCoroutine != null) { StopCoroutine(seekCoroutine); }
+		freeFleeBehaviour.SetIsSeeking(false);
 		if (isAttacking) {
 			isAttacking = false;
 		}
@@ -515,6 +528,8 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StopBerserk() {
 		isChasingBerserk = false;
+		if (seekCoroutine != null) { StopCoroutine(seekCoroutine); }
+		freeFleeBehaviour.SetIsSeeking(false);
 		if (isAttacking) {
 			isAttacking = false;
 		}
