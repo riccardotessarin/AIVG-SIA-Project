@@ -20,7 +20,7 @@ public class MonsterBehaviour : MonoBehaviour
 	SeekBehaviour seekBehaviour;
 	//FleeBehaviour fleeBehaviour;
 	FreeFleeBehaviour freeFleeBehaviour;
-	FreeRoamingBehaviour freeRoamingBehaviour;
+	//FreeRoamingBehaviour freeRoamingBehaviour;
 	SeekRestoreBehaviour seekRestoreBehaviour;
 
 	private float reactionTime = 1.5f;
@@ -91,7 +91,7 @@ public class MonsterBehaviour : MonoBehaviour
 		seekBehaviour = GetComponent<SeekBehaviour>();
 		//fleeBehaviour = GetComponent<FleeBehaviour>();
 		freeFleeBehaviour = GetComponent<FreeFleeBehaviour>();
-		freeRoamingBehaviour = GetComponent<FreeRoamingBehaviour>();
+		//freeRoamingBehaviour = GetComponent<FreeRoamingBehaviour>();
 		seekRestoreBehaviour = GetComponent<SeekRestoreBehaviour>();
 
 		#region FSM setup
@@ -293,7 +293,7 @@ public class MonsterBehaviour : MonoBehaviour
 		{
 			case MonsterState.calm:
 				if (isRoaming) {
-					components.Add(freeRoamingBehaviour.GetAcceleration(status));
+					components.Add(freeFleeBehaviour.GetAcceleration(status));
 				}
 				break;
 			case MonsterState.annoyed:
@@ -307,7 +307,7 @@ public class MonsterBehaviour : MonoBehaviour
 					components.Add(seekBehaviour.GetAcceleration(status));
 				} else {
 					// Continues free roaming
-					components.Add(freeRoamingBehaviour.GetAcceleration(status));
+					components.Add(freeFleeBehaviour.GetAcceleration(status));
 				}
 				break;
 			case MonsterState.berserk:
@@ -315,7 +315,7 @@ public class MonsterBehaviour : MonoBehaviour
 					components.Add(seekBehaviour.GetAcceleration(status));
 				} else {
 					// Continues free roaming
-					components.Add(freeRoamingBehaviour.GetAcceleration(status));
+					components.Add(freeFleeBehaviour.GetAcceleration(status));
 				}
 				break;
 			case MonsterState.replenish:
@@ -397,7 +397,7 @@ public class MonsterBehaviour : MonoBehaviour
 		// If we saw the player at least once, we start by going to the last known position
 		if (sensedPlayer) {
 			sensedPlayer = false;
-			freeRoamingBehaviour.ResetTargetRandomPosition(player.transform);
+			freeFleeBehaviour.ResetTargetRandomPosition(player.transform);
 		}
 		return false;
 	}
@@ -446,6 +446,7 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StartFleeing() {
 		isFleeing = true;
+		freeFleeBehaviour.SetIsFleeing(true);
 		currentSpeed = monsterSpeed["flee"];
 		currentState = MonsterState.annoyed;
 	}
@@ -467,6 +468,7 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StopFleeing() {
 		isFleeing = false;
+		freeFleeBehaviour.SetIsFleeing(false);
 		if (isAttacking) {
 			isAttacking = false;
 		}

@@ -5,6 +5,7 @@ public class SeekRestoreBehaviour : MovementBehaviour {
 	public Transform destination;
 	public Transform fleeFrom;
 
+	/*
 	public float gas = 3f;
 	//public float steer = 30f;
 	public float brake = 20f;
@@ -13,6 +14,7 @@ public class SeekRestoreBehaviour : MovementBehaviour {
 	public float stopAt = 0.01f;
 
 	public float fleeRange = 10f;
+	*/
 
 	public override Vector3 GetAcceleration (MovementStatus status) {
 		if (destination != null) {

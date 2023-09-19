@@ -10,7 +10,8 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
 
-	public static GameManager Instance;
+	private static GameManager instance;
+	public static GameManager Instance { get { return instance; }}
 
 	public static bool GameIsPaused = false;
 
@@ -23,22 +24,27 @@ public class GameManager : MonoBehaviour {
 
 	public float steer = 60f; // Maybe make it 30 for avoid behaviour volume
 	public float backpedal = 10f;
+	public float gas = 3f;
+	public float brake = 20f;
+	public float brakeAt = 1f; // Check if this can be shared by all behaviours or revert to 5 (1 only for seek)
+	public float stopAt = 0.01f;
+	public float fleeRange = 5f;
 
 
 	private void Awake() {
 		//Singleton method
-		if ( Instance == null ) {
+		if ( instance == null ) {
 			//First run, set the instance
-			Instance = this;
-			Instance.state = GameState.Play;
+			instance = this;
+			instance.state = GameState.Play;
 			
 			DontDestroyOnLoad(gameObject);
  
-		} else if ( Instance != this ) {
+		} else if ( instance != this ) {
 			//Instance is not the same as the one we have, destroy old one, and reset to newest one
-			GameState gs = Instance.state;
-			Instance = this;
-			Instance.state = gs;
+			GameState gs = instance.state;
+			instance = this;
+			instance.state = gs;
 			/*
 			GameDifficulty gd = Instance.gameDifficulty;
 			//Debug.Log(gs);
@@ -53,7 +59,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	private void Start() {
-		UpdateGameState(Instance.state);
+		UpdateGameState(instance.state);
 	}
 
 	private void Update() {

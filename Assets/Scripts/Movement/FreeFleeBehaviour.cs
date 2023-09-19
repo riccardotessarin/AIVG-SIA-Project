@@ -9,7 +9,12 @@ public class FreeFleeBehaviour : MovementBehaviour {
 	public Vector3 targetRandomPosition = new Vector3(20, 1, 20);
 	private float time = 0f;
 	private float timeToTarget = 5f;
+	private bool inRange = false;
+	private float percentage = 0f;
+	[SerializeField]
+	private bool isFleeing = false;
 
+	/*
 	public float gas = 3f;
 	//public float steer = 30f;
 	public float brake = 20f;
@@ -18,8 +23,8 @@ public class FreeFleeBehaviour : MovementBehaviour {
 	public float stopAt = 0.01f;
 
 	public float fleeRange = 5f;
-	private bool inRange = false;
-	private float percentage = 0f;
+	*/
+	
 
     public override Vector3 GetAcceleration(MovementStatus status) {
         if (targetRandomPosition != null) {
@@ -36,6 +41,12 @@ public class FreeFleeBehaviour : MovementBehaviour {
 			Vector3 normalComponent = (toDestination.normalized - tangentComponent);
 			time += Time.deltaTime;
 
+			if (isFleeing) {
+				return GetFleeAcceleration(status) + ((tangentComponent * gas) + (normalComponent * steer));
+			} else {
+				return (tangentComponent * gas) + (normalComponent * steer);
+			}
+			/*
 			if (fleeFrom != null) {
 				Vector3 fleeAdj = new Vector3();
 				Vector3 vAdj = new Vector3 (fleeFrom.position.x, transform.position.y, fleeFrom.position.z);
@@ -56,10 +67,15 @@ public class FreeFleeBehaviour : MovementBehaviour {
 				return (tangentComponent * gas) + (normalComponent * steer);
 				//return (tangentComponent * (toDestination.magnitude > brakeAt ? gas : -brake)) + (normalComponent * steer);
 			}
+			*/
 		} else {
 			return Vector3.zero;
 		}
     }
+
+	public void ResetTargetRandomPosition(Transform newTarget) {
+		targetRandomPosition = new Vector3(newTarget.position.x, transform.position.y, newTarget.position.z);
+	}
 
 	public bool PlayerInRange(){
 		return inRange;
@@ -67,5 +83,26 @@ public class FreeFleeBehaviour : MovementBehaviour {
 
 	public float GetPercentage(){
 		return percentage;
+	}
+
+	public void SetIsFleeing(bool flee){
+		isFleeing = flee;
+	}
+
+	private Vector3 GetFleeAcceleration(MovementStatus status){
+		Vector3 fleeAdj = new Vector3();
+		Vector3 vAdj = new Vector3 (fleeFrom.position.x, transform.position.y, fleeFrom.position.z);
+		Vector3 fromDest = (transform.position - vAdj);
+		if (fromDest.magnitude < fleeRange) {
+			Vector3 tanComponent = Vector3.Project (fromDest.normalized, status.movementDirection);
+			Vector3 normComponent = (fromDest.normalized - tanComponent);
+			fleeAdj = (tanComponent * gas) + (normComponent * steer);
+			inRange = true;
+			percentage = 1 - (fromDest.magnitude / fleeRange);
+		} else {
+			inRange = false;
+			fleeAdj = Vector3.zero;
+		}
+		return fleeAdj;
 	}
 }

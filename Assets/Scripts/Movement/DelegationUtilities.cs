@@ -11,18 +11,29 @@ public class MovementStatus {
 public abstract class MovementBehaviour : MonoBehaviour {
 	protected float sightRange;
 	protected float sightAngle;
-	public float steer; // Maybe make it 30 for avoid behaviour volume
+	[SerializeField]
+	protected float steer; // Maybe make it 30 for avoid behaviour volume
 	protected float backpedal;
+	protected float gas;
+	protected float brake;
+	[SerializeField]
+	protected float brakeAt;
+	protected float stopAt;
+	[SerializeField]
+	protected float fleeRange;
+	
 
-	/// <summary>
-	/// Awake is called when the script instance is being loaded.
-	/// </summary>
-	void Awake()
+	void Start()
 	{
 		sightRange = GameManager.Instance.sightRange;
 		sightAngle = GameManager.Instance.sightAngle;
 		steer = GameManager.Instance.steer;
 		backpedal = GameManager.Instance.backpedal;
+		gas = GameManager.Instance.gas;
+		brake = GameManager.Instance.brake;
+		brakeAt = GameManager.Instance.brakeAt; // Check if this can be shared by all behaviours or revert to 5 (1 only for seek)
+		stopAt = GameManager.Instance.stopAt;
+		fleeRange = GameManager.Instance.fleeRange;
 	}
 
 	public abstract Vector3 GetAcceleration (MovementStatus status);
