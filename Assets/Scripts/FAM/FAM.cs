@@ -1,83 +1,104 @@
 using System;
-using System.Collections.Generic;
 
-public class FuzzySet
+/// <summary>
+/// Defines a fuzzy variable with its membership values
+/// </summary>
+public class FuzzyVariable
 {
-	public string Name { get; set; }
-	public double Membership { get; set; }
+	public double Low { get; set; }
+	public double Medium { get; set; }
+	public double High { get; set; }
 }
 
+/// <summary>
+/// Defines a fuzzy rule with its conditions and conclusion
+/// Uses the Evalute() method to determine if the rule is true and gives the conclusion
+/// </summary>
 public class FuzzyRule
 {
-	public List<FuzzySet> Inputs { get; set; }
-	public FuzzySet Output { get; set; }
-	//public List<FuzzySet> Outputs { get; set; }
-}
+	public FuzzyCondition[] Conditions { get; set; }
+	public FuzzyConclusion Conclusion { get; set; }
 
-public class FuzzyAssociativeMemory
-{
-	private List<FuzzyRule> rules;
-
-	public FuzzyAssociativeMemory()
+	public bool Evaluate()
 	{
-		rules = new List<FuzzyRule>();
-	}
-
-	public void AddRule(FuzzyRule rule)
-	{
-		rules.Add(rule);
-	}
-
-	//public List<FuzzySet> Infer(List<FuzzySet> inputs)
-	public FuzzySet Infer(List<FuzzySet> inputs)
-	{
-		//List<FuzzySet> outputs = new List<FuzzySet>();
-		FuzzySet output = null;
-		double maxMembership = 0;
-
-		foreach (FuzzyRule rule in rules)
+		foreach (FuzzyCondition condition in Conditions)
 		{
-			bool isMatch = true;
-
-			for (int i = 0; i < inputs.Count; i++)
+			if (!condition.Evaluate())
 			{
-				if (rule.Inputs[i].Membership < inputs[i].Membership)
-				{
-					isMatch = false;
-					break;
-				}
-			}
-
-			if (isMatch)
-            {
-                double minMembership = double.MaxValue;
-
-                foreach (FuzzySet input in rule.Inputs)
-                {
-                    if (input.Membership < minMembership)
-                    {
-                        minMembership = input.Membership;
-                    }
-                }
-
-                if (minMembership > maxMembership)
-                {
-                    maxMembership = minMembership;
-                    output = rule.Output;
-                }
-            }
-        }
-
-        return output;
-	/*
-			if (isMatch)
-			{
-				outputs.AddRange(rule.Outputs);
+				return false;
 			}
 		}
-
-		return outputs;
-	*/
+		// Return true only if all conditions are true, so the rule is true
+		return true;
 	}
 }
 
+public class FuzzyCondition
+{
+	public FuzzyVariable Variable { get; set; }
+	public string SetName { get; set; }
+
+	public bool Evaluate()
+	{
+		if (Variable == null)
+		{
+			return false;
+		}
+
+		switch (SetName)
+		{
+			case "low":
+				return Variable.Low > 0;
+			case "medium":
+				return Variable.Medium > 0;
+			case "high":
+				return Variable.High > 0;
+			default:
+				return false;
+		}
+	}
+}
+
+public class FuzzyConclusion
+{
+	public FuzzyVariable Variable { get; set; }
+	public string SetName { get; set; }
+}
+
+public class FuzzyInferenceSystem
+{
+	public FuzzyRule[] Rules { get; set; }
+	public FuzzyVariable[] Inputs { get; set; }
+	public FuzzyVariable[] Outputs { get; set; }
+
+	public void Calculate()
+	{
+		foreach (FuzzyVariable output in Outputs)
+		{
+			output.Low = 0;
+			output.Medium = 0;
+			output.High = 0;
+		}
+
+		foreach (FuzzyRule rule in Rules)
+		{
+			if (rule.Evaluate())
+			{
+				FuzzyVariable output = rule.Conclusion.Variable;
+				
+				switch (rule.Conclusion.SetName)
+				{
+					case "low":
+						output.Low = Math.Max(output.Low, 1);
+						break;
+					case "medium":
+						output.Medium = Math.Max(output.Medium, 1);
+						break;
+					case "high":
+						output.High = Math.Max(output.High, 1);
+						break;
+				}
+			}
+		}
+	}
+}
