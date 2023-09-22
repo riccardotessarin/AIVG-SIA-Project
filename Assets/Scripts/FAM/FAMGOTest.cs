@@ -50,8 +50,8 @@ public class FAMGOTest : MonoBehaviour
 		// Make empty fuzzy variable for the output
 		FuzzyVariable physicalstatus = new FuzzyVariable();
 
-		double crispStress = 35;
-		double crispGrudge = 10;
+		double crispStress = 25;
+		double crispGrudge = 35;
 		FuzzyVariable stressFuzzy = fuzzify.ToFuzzy(crispStress);
 		Debug.Log("Stress fuzzy: " + stressFuzzy.MembershipValues[FuzzyClass.low] + ", " + stressFuzzy.MembershipValues[FuzzyClass.medium] + ", " + stressFuzzy.MembershipValues[FuzzyClass.high]);
 		//Debug.Log("Stress fuzzy: " + stressFuzzy.Low + ", " + stressFuzzy.Medium + ", " + stressFuzzy.High);
@@ -64,6 +64,25 @@ public class FAMGOTest : MonoBehaviour
 
 		FuzzyRule[] rules = new FuzzyRule[]
 		{
+			new FuzzyRule {
+				Conditions = new FuzzyCondition[]
+				{
+					new FuzzyCondition { Variable = stressFuzzy, SetClass = FuzzyClass.low },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetClasses = new FuzzyClass[] { FuzzyClass.low, FuzzyClass.medium } },
+				},
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetClass = FuzzyClass.high }
+			},
+			new FuzzyRule
+			{
+				Conditions = new FuzzyCondition[]
+				{
+					new FuzzyCondition { Variable = stressFuzzy, SetClass = FuzzyClass.medium },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetClasses = new FuzzyClass[] { FuzzyClass.low, FuzzyClass.medium } },
+				},
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetClass = FuzzyClass.medium }
+			},
+
+			/*
 			new FuzzyRule
 			{
 				Conditions = new FuzzyCondition[]
@@ -82,6 +101,7 @@ public class FAMGOTest : MonoBehaviour
 				},
 				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetClass = FuzzyClass.high }
 			},
+			
 			new FuzzyRule
 			{
 				Conditions = new FuzzyCondition[]
@@ -100,6 +120,7 @@ public class FAMGOTest : MonoBehaviour
 				},
 				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetClass = FuzzyClass.medium }
 			},
+			*/
 			new FuzzyRule
 			{
 				Conditions = new FuzzyCondition[]

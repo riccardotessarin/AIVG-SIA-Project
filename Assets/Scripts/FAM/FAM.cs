@@ -50,12 +50,28 @@ public class FuzzyCondition
 {
 	public FuzzyVariable Variable { get; set; }
 	public FuzzyClass SetClass { get; set; }	// This will become a list to evaluate and/or conditions
+	public FuzzyClass[] SetClasses { get; set; }
 
 	public bool Evaluate()
 	{
 		if (Variable == null)
 		{
 			return false;
+		}
+
+		// This sets the fuzzyclass to the one with the highest membership value
+		// We're doing the fuzzy OR operation here
+		// If all is 0 or two membership values are the same, it will return the first one
+		// This is not a problem since we just need the membership value and not the specific fuzzy class,
+		// and if everything is 0 the switch will handle it
+		if (SetClasses != null)
+		{
+			SetClass = Variable.MembershipValues
+			.Where(kvp => SetClasses.Contains(kvp.Key))
+			.OrderByDescending(kvp => kvp.Value)
+			.Select(kvp => kvp.Key).FirstOrDefault();
+
+			Debug.Log("SETCLASS IS: " + SetClass);
 		}
 
 		switch (SetClass)
@@ -92,10 +108,9 @@ public class FuzzyInferenceSystem
 			rule.Conclusion.Variable.MembershipValues[rule.Conclusion.SetClass] = 
 			rule.Conditions.Min(condition => condition.Variable.MembershipValues[condition.SetClass]);
 		}
-		foreach (FuzzyVariable output in Outputs) {
-			for (int i = 0; i < Outputs.Length; i++) {
-				Outputs[i] = trueRules.Where(rule => rule.Conclusion.Variable == Outputs[i]).Select(rule => rule.Conclusion.Variable).FirstOrDefault();
-			}
+
+		for (int i = 0; i < Outputs.Length; i++) {
+			Outputs[i] = trueRules.Where(rule => rule.Conclusion.Variable == Outputs[i]).Select(rule => rule.Conclusion.Variable).FirstOrDefault();
 		}
 	}
 }
