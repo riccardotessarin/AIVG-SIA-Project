@@ -9,7 +9,6 @@ public class Fuzzify
 
 	public Fuzzify()
 	{
-		//Name = name;
 		MembershipFunctions = new Dictionary<string, double[]>();
 	}
 
@@ -78,7 +77,6 @@ public class Fuzzify
 		{
 			double membershipValue = CalculateTrapezoidalMembershipValue(crispValue, membershipFunction.Key);
 			Debug.Log("Membership value for " + membershipFunction.Key + ": " + membershipValue);
-			//Console.WriteLine($"Membership value for {membershipFunction.Key} in {Name}: {membershipValue}");
 		}
 	}
 
@@ -88,16 +86,13 @@ public class Fuzzify
 		foreach (var membershipFunction in MembershipFunctions)
 		{
 			double membershipValue = CalculateTrapezoidalMembershipValue(crispValue, membershipFunction.Key);
-			Debug.Log("Membership value for " + membershipFunction.Key + ": " + membershipValue);
-			//Console.WriteLine($"Membership value for {membershipFunction.Key} in {Name}: {membershipValue}");
+			//Debug.Log("Membership value for " + membershipFunction.Key + ": " + membershipValue);
 			membershipValues.Add(membershipValue);
 		}
 		FuzzyVariable fuzzyVariable = new FuzzyVariable();
 		fuzzyVariable.MembershipValues[FuzzyClass.low] = membershipValues[0];
 		fuzzyVariable.MembershipValues[FuzzyClass.medium] = membershipValues[1];
 		fuzzyVariable.MembershipValues[FuzzyClass.high] = membershipValues[2];
-
-		//FuzzyVariable fuzzyVariable = new FuzzyVariable() { Low = membershipValues[0], Medium = membershipValues[1], High = membershipValues[2] };
 		return fuzzyVariable;
 	}
 }

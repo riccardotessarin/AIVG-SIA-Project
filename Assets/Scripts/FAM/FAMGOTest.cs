@@ -35,62 +35,20 @@ public class FAMGOTest : MonoBehaviour
 		fuzzify.AddMembershipFunction("Medium", new double[] { 20, 40, 60, 80 });
 		fuzzify.AddMembershipFunction("High", new double[] { 60, 80, 100, 100 });
 
-		/*
-		double crispHealth = 75;
+		double crispHealth = 25;
 		double crispHunger = 25;
 		double crispSleepiness = 25;
 		//health.Fuzzify(crispHealth);
 		FuzzyVariable healthFuzzy = fuzzify.ToFuzzy(crispHealth);
-		Debug.Log("Health fuzzy: " + healthFuzzy.Low + ", " + healthFuzzy.Medium + ", " + healthFuzzy.High);
+		Debug.Log("Health fuzzy: " + healthFuzzy.MembershipValues[FuzzyClass.low] + ", " + healthFuzzy.MembershipValues[FuzzyClass.medium] + ", " + healthFuzzy.MembershipValues[FuzzyClass.high]);
 
 		FuzzyVariable hungerFuzzy = fuzzify.ToFuzzy(crispHunger);
-		Debug.Log("Hunger fuzzy: " + hungerFuzzy.Low + ", " + hungerFuzzy.Medium + ", " + hungerFuzzy.High);
+		Debug.Log("Hunger fuzzy: " + hungerFuzzy.MembershipValues[FuzzyClass.low] + ", " + hungerFuzzy.MembershipValues[FuzzyClass.medium] + ", " + hungerFuzzy.MembershipValues[FuzzyClass.high]);
 		FuzzyVariable sleepinessFuzzy = fuzzify.ToFuzzy(crispSleepiness);
-		Debug.Log("Sleepiness fuzzy: " + sleepinessFuzzy.Low + ", " + sleepinessFuzzy.Medium + ", " + sleepinessFuzzy.High);
+		Debug.Log("Sleepiness fuzzy: " + sleepinessFuzzy.MembershipValues[FuzzyClass.low] + ", " + sleepinessFuzzy.MembershipValues[FuzzyClass.medium] + ", " + sleepinessFuzzy.MembershipValues[FuzzyClass.high]);
 
 		// Make empty fuzzy variable for the output
 		FuzzyVariable physicalstatus = new FuzzyVariable();
-
-		FuzzyRule[] rules = new FuzzyRule[]
-		{
-			new FuzzyRule
-			{
-				Conditions = new FuzzyCondition[]
-				{
-					new FuzzyCondition { Variable = healthFuzzy, SetName = "low" },
-					new FuzzyCondition { Variable = hungerFuzzy, SetName = "high" },
-					new FuzzyCondition { Variable = sleepinessFuzzy, SetName = "high" }
-				},
-				Conclusion = new FuzzyConclusion { Variable = physicalstatus, SetName = "medium" }
-				//Conclusion = new FuzzyConclusion { Variable = physicalstatus, SetName = "replenish" }
-			},
-			new FuzzyRule
-			{
-				Conditions = new FuzzyCondition[]
-				{
-					new FuzzyCondition { Variable = healthFuzzy, SetName = "low" },
-					new FuzzyCondition { Variable = hungerFuzzy, SetName = "low" },
-					new FuzzyCondition { Variable = sleepinessFuzzy, SetName = "low" }
-				},
-				Conclusion = new FuzzyConclusion { Variable = physicalstatus, SetName = "bad" }
-			}
-		};
-
-		// Create the fuzzy inference system
-		FuzzyInferenceSystem fis = new FuzzyInferenceSystem
-		{
-			Rules = rules,
-			Inputs = new FuzzyVariable[] { healthFuzzy, hungerFuzzy, sleepinessFuzzy },
-			Outputs = new FuzzyVariable[] { physicalstatus }
-		};
-
-		// Perform the fuzzy inference
-		fis.Calculate();
-
-		// Get the output values
-		double physicalStatusValue = Math.Max(physicalstatus.Low, Math.Max(physicalstatus.Medium, physicalstatus.High));
-		Debug.Log("Physical status value: " + physicalStatusValue);
-		*/
 
 		double crispStress = 35;
 		double crispGrudge = 10;
@@ -110,37 +68,58 @@ public class FAMGOTest : MonoBehaviour
 			{
 				Conditions = new FuzzyCondition[]
 				{
-					new FuzzyCondition { Variable = stressFuzzy, SetName = FuzzyClass.low },
-					new FuzzyCondition { Variable = grudgeFuzzy, SetName = FuzzyClass.low },
+					new FuzzyCondition { Variable = stressFuzzy, SetClass = FuzzyClass.low },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetClass = FuzzyClass.low },
 				},
-				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = FuzzyClass.high }
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetClass = FuzzyClass.high }
 			},
 			new FuzzyRule
 			{
 				Conditions = new FuzzyCondition[]
 				{
-					new FuzzyCondition { Variable = stressFuzzy, SetName = FuzzyClass.low },
-					new FuzzyCondition { Variable = grudgeFuzzy, SetName = FuzzyClass.medium },
+					new FuzzyCondition { Variable = stressFuzzy, SetClass = FuzzyClass.low },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetClass = FuzzyClass.medium },
 				},
-				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = FuzzyClass.high }
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetClass = FuzzyClass.high }
 			},
 			new FuzzyRule
 			{
 				Conditions = new FuzzyCondition[]
 				{
-					new FuzzyCondition { Variable = stressFuzzy, SetName = FuzzyClass.medium },
-					new FuzzyCondition { Variable = grudgeFuzzy, SetName = FuzzyClass.low },
+					new FuzzyCondition { Variable = stressFuzzy, SetClass = FuzzyClass.medium },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetClass = FuzzyClass.low },
 				},
-				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = FuzzyClass.medium }
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetClass = FuzzyClass.medium }
 			},
 			new FuzzyRule
 			{
 				Conditions = new FuzzyCondition[]
 				{
-					new FuzzyCondition { Variable = stressFuzzy, SetName = FuzzyClass.medium },
-					new FuzzyCondition { Variable = grudgeFuzzy, SetName = FuzzyClass.medium },
+					new FuzzyCondition { Variable = stressFuzzy, SetClass = FuzzyClass.medium },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetClass = FuzzyClass.medium },
 				},
-				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = FuzzyClass.medium }
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetClass = FuzzyClass.medium }
+			},
+			new FuzzyRule
+			{
+				Conditions = new FuzzyCondition[]
+				{
+					new FuzzyCondition { Variable = healthFuzzy, SetClass = FuzzyClass.low },
+					new FuzzyCondition { Variable = hungerFuzzy, SetClass = FuzzyClass.high },
+					new FuzzyCondition { Variable = sleepinessFuzzy, SetClass = FuzzyClass.high }
+				},
+				Conclusion = new FuzzyConclusion { Variable = physicalstatus, SetClass = FuzzyClass.medium }
+				//Conclusion = new FuzzyConclusion { Variable = physicalstatus, SetName = "replenish" }
+			},
+			new FuzzyRule
+			{
+				Conditions = new FuzzyCondition[]
+				{
+					new FuzzyCondition { Variable = healthFuzzy, SetClass = FuzzyClass.low },
+					new FuzzyCondition { Variable = hungerFuzzy, SetClass = FuzzyClass.low },
+					new FuzzyCondition { Variable = sleepinessFuzzy, SetClass = FuzzyClass.low }
+				},
+				Conclusion = new FuzzyConclusion { Variable = physicalstatus, SetClass = FuzzyClass.low }
 			}
 		};
 
@@ -148,15 +127,19 @@ public class FAMGOTest : MonoBehaviour
 		FuzzyInferenceSystem mentalFIS = new FuzzyInferenceSystem
 		{
 			Rules = rules,
-			Inputs = new FuzzyVariable[] { stressFuzzy, grudgeFuzzy },
-			Outputs = new FuzzyVariable[] { mentalstatus }
+			Inputs = new FuzzyVariable[] { healthFuzzy, hungerFuzzy, sleepinessFuzzy, stressFuzzy, grudgeFuzzy },
+			Outputs = new FuzzyVariable[] { mentalstatus, physicalstatus }
 		};
 
 		// Perform the fuzzy inference
 		mentalFIS.Calculate();
 
 		Debug.Log("Mental status: " + mentalstatus.MembershipValues[FuzzyClass.low] + ", " + mentalstatus.MembershipValues[FuzzyClass.medium] + ", " + mentalstatus.MembershipValues[FuzzyClass.high]);
-		//Debug.Log("Mental status: " + mentalstatus.Low + ", " + mentalstatus.Medium + ", " + mentalstatus.High);
+		Debug.Log("Physical status: " + physicalstatus.MembershipValues[FuzzyClass.low] + ", " + physicalstatus.MembershipValues[FuzzyClass.medium] + ", " + physicalstatus.MembershipValues[FuzzyClass.high]);
+
+		// Get the output values
+		double physicalStatusValue = Math.Max(physicalstatus.MembershipValues[FuzzyClass.low], Math.Max(physicalstatus.MembershipValues[FuzzyClass.medium], physicalstatus.MembershipValues[FuzzyClass.high]));
+		Debug.Log("Physical status value: " + physicalStatusValue);
 
 		// Get the output values
 		double mentalStatusValue = Math.Max(mentalstatus.MembershipValues[FuzzyClass.low], Math.Max(mentalstatus.MembershipValues[FuzzyClass.medium], mentalstatus.MembershipValues[FuzzyClass.high]));

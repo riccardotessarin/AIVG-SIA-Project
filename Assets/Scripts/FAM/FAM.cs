@@ -21,12 +21,6 @@ public class FuzzyVariable
 			{ FuzzyClass.high, 0 }
 		};
 	}
-
-	/*
-	public double Low { get; set; }
-	public double Medium { get; set; }
-	public double High { get; set; }
-	*/
 }
 
 /// <summary>
@@ -55,8 +49,7 @@ public class FuzzyRule
 public class FuzzyCondition
 {
 	public FuzzyVariable Variable { get; set; }
-	public FuzzyClass SetName { get; set; }	// This will become a list to evaluate and/or conditions
-	//public string SetName { get; set; }	// This will become a list to evaluate and/or conditions
+	public FuzzyClass SetClass { get; set; }	// This will become a list to evaluate and/or conditions
 
 	public bool Evaluate()
 	{
@@ -65,7 +58,7 @@ public class FuzzyCondition
 			return false;
 		}
 
-		switch (SetName)
+		switch (SetClass)
 		{
 			case FuzzyClass.low:
 				return Variable.MembershipValues[FuzzyClass.low] > 0;
@@ -82,8 +75,7 @@ public class FuzzyCondition
 public class FuzzyConclusion
 {
 	public FuzzyVariable Variable { get; set; }
-	public FuzzyClass SetName { get; set; }
-	//public string SetName { get; set; }
+	public FuzzyClass SetClass { get; set; }
 }
 
 public class FuzzyInferenceSystem
@@ -94,48 +86,16 @@ public class FuzzyInferenceSystem
 
 	public void Calculate()
 	{
-		/*
-		foreach (FuzzyVariable output in Outputs)
-		{
-			output.Low = 0;
-			output.Medium = 0;
-			output.High = 0;
-		}
-		*/
-
 		FuzzyRule[] trueRules = Rules.Where(rule => rule.Evaluate()).ToArray();
 		// We get the minimum membership value for each requested variable class
 		foreach (FuzzyRule rule in trueRules) {
-			rule.Conclusion.Variable.MembershipValues[rule.Conclusion.SetName] = 
-			rule.Conditions.Min(condition => condition.Variable.MembershipValues[condition.SetName]);
+			rule.Conclusion.Variable.MembershipValues[rule.Conclusion.SetClass] = 
+			rule.Conditions.Min(condition => condition.Variable.MembershipValues[condition.SetClass]);
 		}
 		foreach (FuzzyVariable output in Outputs) {
 			for (int i = 0; i < Outputs.Length; i++) {
 				Outputs[i] = trueRules.Where(rule => rule.Conclusion.Variable == Outputs[i]).Select(rule => rule.Conclusion.Variable).FirstOrDefault();
 			}
 		}
-		
-		/*
-		foreach (FuzzyRule rule in Rules)
-		{
-			if (rule.Evaluate())
-			{
-				FuzzyVariable output = rule.Conclusion.Variable;
-				Debug.Log("Output from rule conclusion: " + output.Low + ", " + output.Medium + ", " + output.High);
-				switch (rule.Conclusion.SetName)
-				{
-					case "low":
-						output.Low = Math.Max(output.Low, 1);
-						break;
-					case "medium":
-						output.Medium = Math.Max(output.Medium, 1);
-						break;
-					case "high":
-						output.High = Math.Max(output.High, 1);
-						break;
-				}
-			}
-		}
-		*/
 	}
 }
