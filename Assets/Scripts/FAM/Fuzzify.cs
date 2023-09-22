@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FuzzifyVariable
+public class Fuzzify
 {
-	public string Name { get; set; }
+	//public string Name { get; set; }
 	public Dictionary<string, double[]> MembershipFunctions { get; set; }
 
-	public FuzzifyVariable(string name)
+	public Fuzzify()
 	{
-		Name = name;
+		//Name = name;
 		MembershipFunctions = new Dictionary<string, double[]>();
 	}
 
@@ -72,12 +72,12 @@ public class FuzzifyVariable
         return membershipValue;
     }
 
-	public void Fuzzify(double crispValue)
+	public void ShowFuzzify(double crispValue)
 	{
 		foreach (var membershipFunction in MembershipFunctions)
 		{
 			double membershipValue = CalculateTrapezoidalMembershipValue(crispValue, membershipFunction.Key);
-			Debug.Log("Membership value for " + membershipFunction.Key + " in " + Name + ": " + membershipValue);
+			Debug.Log("Membership value for " + membershipFunction.Key + ": " + membershipValue);
 			//Console.WriteLine($"Membership value for {membershipFunction.Key} in {Name}: {membershipValue}");
 		}
 	}
@@ -88,7 +88,7 @@ public class FuzzifyVariable
 		foreach (var membershipFunction in MembershipFunctions)
 		{
 			double membershipValue = CalculateTrapezoidalMembershipValue(crispValue, membershipFunction.Key);
-			Debug.Log("Membership value for " + membershipFunction.Key + " in " + Name + ": " + membershipValue);
+			Debug.Log("Membership value for " + membershipFunction.Key + ": " + membershipValue);
 			//Console.WriteLine($"Membership value for {membershipFunction.Key} in {Name}: {membershipValue}");
 			membershipValues.Add(membershipValue);
 		}

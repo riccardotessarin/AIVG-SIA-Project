@@ -20,19 +20,22 @@ public class FAMGOTest : MonoBehaviour
 
 	public static void FuzzifyMain()
 	{
-		FuzzifyVariable temperature = new FuzzifyVariable("Temperature");
+		/*
+		Fuzzify temperature = new Fuzzify();
 		temperature.AddMembershipFunction("Cold", new double[] { 0, 10, 15, 20 });
 		temperature.AddMembershipFunction("Medium", new double[] { 15, 20, 25, 30 });
 		temperature.AddMembershipFunction("Hot", new double[] { 25, 30, 35, 40 });
 
 		double crispTemperature = 27.5;
-		temperature.Fuzzify(crispTemperature);
+		temperature.ShowFuzzify(crispTemperature);
+		*/
 
-		FuzzifyVariable fuzzify = new FuzzifyVariable("Health");
+		Fuzzify fuzzify = new Fuzzify();
 		fuzzify.AddMembershipFunction("Low", new double[] { 0, 0, 20, 40 });
 		fuzzify.AddMembershipFunction("Medium", new double[] { 20, 40, 60, 80 });
 		fuzzify.AddMembershipFunction("High", new double[] { 60, 80, 100, 100 });
 
+		/*
 		double crispHealth = 75;
 		double crispHunger = 25;
 		double crispSleepiness = 25;
@@ -45,6 +48,7 @@ public class FAMGOTest : MonoBehaviour
 		FuzzyVariable sleepinessFuzzy = fuzzify.ToFuzzy(crispSleepiness);
 		Debug.Log("Sleepiness fuzzy: " + sleepinessFuzzy.Low + ", " + sleepinessFuzzy.Medium + ", " + sleepinessFuzzy.High);
 
+		// Make empty fuzzy variable for the output
 		FuzzyVariable physicalstatus = new FuzzyVariable();
 
 		FuzzyRule[] rules = new FuzzyRule[]
@@ -86,6 +90,74 @@ public class FAMGOTest : MonoBehaviour
 		// Get the output values
 		double physicalStatusValue = Math.Max(physicalstatus.Low, Math.Max(physicalstatus.Medium, physicalstatus.High));
 		Debug.Log("Physical status value: " + physicalStatusValue);
+		*/
+
+		double crispStress = 35;
+		double crispGrudge = 10;
+		FuzzyVariable stressFuzzy = fuzzify.ToFuzzy(crispStress);
+		Debug.Log("Stress fuzzy: " + stressFuzzy.Low + ", " + stressFuzzy.Medium + ", " + stressFuzzy.High);
+		FuzzyVariable grudgeFuzzy = fuzzify.ToFuzzy(crispGrudge);
+		Debug.Log("Grudge fuzzy: " + grudgeFuzzy.Low + ", " + grudgeFuzzy.Medium + ", " + grudgeFuzzy.High);
+
+		// Make empty fuzzy variable for the output
+		FuzzyVariable mentalstatus = new FuzzyVariable();
+
+		FuzzyRule[] rules = new FuzzyRule[]
+		{
+			new FuzzyRule
+			{
+				Conditions = new FuzzyCondition[]
+				{
+					new FuzzyCondition { Variable = stressFuzzy, SetName = "low" },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetName = "low" },
+				},
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = "high" }
+			},
+			new FuzzyRule
+			{
+				Conditions = new FuzzyCondition[]
+				{
+					new FuzzyCondition { Variable = stressFuzzy, SetName = "low" },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetName = "medium" },
+				},
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = "high" }
+			},
+			new FuzzyRule
+			{
+				Conditions = new FuzzyCondition[]
+				{
+					new FuzzyCondition { Variable = stressFuzzy, SetName = "medium" },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetName = "low" },
+				},
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = "medium" }
+			},
+			new FuzzyRule
+			{
+				Conditions = new FuzzyCondition[]
+				{
+					new FuzzyCondition { Variable = stressFuzzy, SetName = "medium" },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetName = "medium" },
+				},
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = "medium" }
+			}
+		};
+
+		// Create the fuzzy inference system
+		FuzzyInferenceSystem mentalFIS = new FuzzyInferenceSystem
+		{
+			Rules = rules,
+			Inputs = new FuzzyVariable[] { stressFuzzy, grudgeFuzzy },
+			Outputs = new FuzzyVariable[] { mentalstatus }
+		};
+
+		// Perform the fuzzy inference
+		mentalFIS.Calculate();
+
+		Debug.Log("Mental status: " + mentalstatus.Low + ", " + mentalstatus.Medium + ", " + mentalstatus.High);
+
+		// Get the output values
+		double mentalStatusValue = Math.Max(mentalstatus.Low, Math.Max(mentalstatus.Medium, mentalstatus.High));
+		Debug.Log("Mental status value: " + mentalStatusValue);
 	}
 
 	public static void Main()

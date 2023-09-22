@@ -1,10 +1,16 @@
 using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+public enum FuzzyClass { low, medium, high };
 
 /// <summary>
 /// Defines a fuzzy variable with its membership values
 /// </summary>
 public class FuzzyVariable
 {
+	public Dictionary<FuzzyClass, double> MembershipValues { get; set; }
+
 	public double Low { get; set; }
 	public double Medium { get; set; }
 	public double High { get; set; }
@@ -36,7 +42,8 @@ public class FuzzyRule
 public class FuzzyCondition
 {
 	public FuzzyVariable Variable { get; set; }
-	public string SetName { get; set; }
+	//public FuzzyClass SetName { get; set; }	// This will become a list to evaluate and/or conditions
+	public string SetName { get; set; }	// This will become a list to evaluate and/or conditions
 
 	public bool Evaluate()
 	{
@@ -85,7 +92,7 @@ public class FuzzyInferenceSystem
 			if (rule.Evaluate())
 			{
 				FuzzyVariable output = rule.Conclusion.Variable;
-				
+				Debug.Log("Output from rule conclusion: " + output.Low + ", " + output.Medium + ", " + output.High);
 				switch (rule.Conclusion.SetName)
 				{
 					case "low":
