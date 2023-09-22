@@ -95,9 +95,11 @@ public class FAMGOTest : MonoBehaviour
 		double crispStress = 35;
 		double crispGrudge = 10;
 		FuzzyVariable stressFuzzy = fuzzify.ToFuzzy(crispStress);
-		Debug.Log("Stress fuzzy: " + stressFuzzy.Low + ", " + stressFuzzy.Medium + ", " + stressFuzzy.High);
+		Debug.Log("Stress fuzzy: " + stressFuzzy.MembershipValues[FuzzyClass.low] + ", " + stressFuzzy.MembershipValues[FuzzyClass.medium] + ", " + stressFuzzy.MembershipValues[FuzzyClass.high]);
+		//Debug.Log("Stress fuzzy: " + stressFuzzy.Low + ", " + stressFuzzy.Medium + ", " + stressFuzzy.High);
 		FuzzyVariable grudgeFuzzy = fuzzify.ToFuzzy(crispGrudge);
-		Debug.Log("Grudge fuzzy: " + grudgeFuzzy.Low + ", " + grudgeFuzzy.Medium + ", " + grudgeFuzzy.High);
+		Debug.Log("Grudge fuzzy: " + grudgeFuzzy.MembershipValues[FuzzyClass.low] + ", " + grudgeFuzzy.MembershipValues[FuzzyClass.medium] + ", " + grudgeFuzzy.MembershipValues[FuzzyClass.high]);
+		//Debug.Log("Grudge fuzzy: " + grudgeFuzzy.Low + ", " + grudgeFuzzy.Medium + ", " + grudgeFuzzy.High);
 
 		// Make empty fuzzy variable for the output
 		FuzzyVariable mentalstatus = new FuzzyVariable();
@@ -108,37 +110,37 @@ public class FAMGOTest : MonoBehaviour
 			{
 				Conditions = new FuzzyCondition[]
 				{
-					new FuzzyCondition { Variable = stressFuzzy, SetName = "low" },
-					new FuzzyCondition { Variable = grudgeFuzzy, SetName = "low" },
+					new FuzzyCondition { Variable = stressFuzzy, SetName = FuzzyClass.low },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetName = FuzzyClass.low },
 				},
-				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = "high" }
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = FuzzyClass.high }
 			},
 			new FuzzyRule
 			{
 				Conditions = new FuzzyCondition[]
 				{
-					new FuzzyCondition { Variable = stressFuzzy, SetName = "low" },
-					new FuzzyCondition { Variable = grudgeFuzzy, SetName = "medium" },
+					new FuzzyCondition { Variable = stressFuzzy, SetName = FuzzyClass.low },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetName = FuzzyClass.medium },
 				},
-				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = "high" }
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = FuzzyClass.high }
 			},
 			new FuzzyRule
 			{
 				Conditions = new FuzzyCondition[]
 				{
-					new FuzzyCondition { Variable = stressFuzzy, SetName = "medium" },
-					new FuzzyCondition { Variable = grudgeFuzzy, SetName = "low" },
+					new FuzzyCondition { Variable = stressFuzzy, SetName = FuzzyClass.medium },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetName = FuzzyClass.low },
 				},
-				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = "medium" }
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = FuzzyClass.medium }
 			},
 			new FuzzyRule
 			{
 				Conditions = new FuzzyCondition[]
 				{
-					new FuzzyCondition { Variable = stressFuzzy, SetName = "medium" },
-					new FuzzyCondition { Variable = grudgeFuzzy, SetName = "medium" },
+					new FuzzyCondition { Variable = stressFuzzy, SetName = FuzzyClass.medium },
+					new FuzzyCondition { Variable = grudgeFuzzy, SetName = FuzzyClass.medium },
 				},
-				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = "medium" }
+				Conclusion = new FuzzyConclusion { Variable = mentalstatus, SetName = FuzzyClass.medium }
 			}
 		};
 
@@ -153,13 +155,16 @@ public class FAMGOTest : MonoBehaviour
 		// Perform the fuzzy inference
 		mentalFIS.Calculate();
 
-		Debug.Log("Mental status: " + mentalstatus.Low + ", " + mentalstatus.Medium + ", " + mentalstatus.High);
+		Debug.Log("Mental status: " + mentalstatus.MembershipValues[FuzzyClass.low] + ", " + mentalstatus.MembershipValues[FuzzyClass.medium] + ", " + mentalstatus.MembershipValues[FuzzyClass.high]);
+		//Debug.Log("Mental status: " + mentalstatus.Low + ", " + mentalstatus.Medium + ", " + mentalstatus.High);
 
 		// Get the output values
-		double mentalStatusValue = Math.Max(mentalstatus.Low, Math.Max(mentalstatus.Medium, mentalstatus.High));
+		double mentalStatusValue = Math.Max(mentalstatus.MembershipValues[FuzzyClass.low], Math.Max(mentalstatus.MembershipValues[FuzzyClass.medium], mentalstatus.MembershipValues[FuzzyClass.high]));
+		//double mentalStatusValue = Math.Max(mentalstatus.Low, Math.Max(mentalstatus.Medium, mentalstatus.High));
 		Debug.Log("Mental status value: " + mentalStatusValue);
 	}
 
+	/*
 	public static void Main()
 	{
 		// Define the fuzzy variables
@@ -270,4 +275,5 @@ public class FAMGOTest : MonoBehaviour
 			Debug.Log("NPC state is calm");
 		}
 	}
+	*/
 }

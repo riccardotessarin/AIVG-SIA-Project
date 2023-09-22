@@ -92,7 +92,12 @@ public class Fuzzify
 			//Console.WriteLine($"Membership value for {membershipFunction.Key} in {Name}: {membershipValue}");
 			membershipValues.Add(membershipValue);
 		}
-		FuzzyVariable fuzzyVariable = new FuzzyVariable() { Low = membershipValues[0], Medium = membershipValues[1], High = membershipValues[2] };
+		FuzzyVariable fuzzyVariable = new FuzzyVariable();
+		fuzzyVariable.MembershipValues[FuzzyClass.low] = membershipValues[0];
+		fuzzyVariable.MembershipValues[FuzzyClass.medium] = membershipValues[1];
+		fuzzyVariable.MembershipValues[FuzzyClass.high] = membershipValues[2];
+
+		//FuzzyVariable fuzzyVariable = new FuzzyVariable() { Low = membershipValues[0], Medium = membershipValues[1], High = membershipValues[2] };
 		return fuzzyVariable;
 	}
 }
