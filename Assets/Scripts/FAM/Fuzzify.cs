@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Fuzzify
@@ -94,5 +95,56 @@ public class Fuzzify
 		fuzzyVariable.MembershipValues[FuzzyClass.medium] = membershipValues[1];
 		fuzzyVariable.MembershipValues[FuzzyClass.high] = membershipValues[2];
 		return fuzzyVariable;
+	}
+
+	public float DefuzzifyMax(FuzzyVariable fuzzyVariable)
+	{
+		float max = 0.0f;
+		FuzzyClass maxFuzzyClass = FuzzyClass.low;
+
+		// If there are no duplicate membership values, return the max value
+		if ( fuzzyVariable.MembershipValues.GroupBy(x => x.Value).Where(x => x.Count() > 1) == null ) {
+			maxFuzzyClass = fuzzyVariable.MembershipValues.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
+			return fuzzyVariable.DefuzzifyValues[maxFuzzyClass];
+		}
+
+		// If we have duplicate membership values, we choose the one with the highest defuzzify value (optimistic) or the lowest (pessimistic)
+		foreach (var membershipValue in fuzzyVariable.MembershipValues) {
+			if (membershipValue.Value > max) {
+				max = (float) membershipValue.Value;
+				maxFuzzyClass = membershipValue.Key;
+			} else if (membershipValue.Value == max) {
+				if (fuzzyVariable.DefuzzifyValues[membershipValue.Key] > fuzzyVariable.DefuzzifyValues[maxFuzzyClass]) {
+					max = (float) membershipValue.Value;
+					maxFuzzyClass = membershipValue.Key;
+				}
+			}
+		}
+
+		return fuzzyVariable.DefuzzifyValues[maxFuzzyClass];
+
+		//return (float) fuzzyVariable.MembershipValues.Max(kvp => kvp.Value);
+		/*
+		foreach (var membershipValue in fuzzyVariable.MembershipValues)
+		{
+			if (membershipValue.Value > max)
+			{
+				max = membershipValue.Value;
+				crispValue = (float)membershipValue.Key;
+			}
+		}
+		return crispValue;
+		*/
+	}
+
+	public float DefuzzifyMean(FuzzyVariable fuzzyVariable) {
+		float sum = 0.0f;
+		float total = 0.0f;
+		foreach (var membershipValue in fuzzyVariable.MembershipValues)
+		{
+			sum += (float)membershipValue.Value * fuzzyVariable.DefuzzifyValues[membershipValue.Key];
+			total += (float)membershipValue.Value;
+		}
+		return sum / total;
 	}
 }

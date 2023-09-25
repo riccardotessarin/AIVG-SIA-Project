@@ -12,6 +12,7 @@ public enum FuzzyClass { low, medium, high };
 public class FuzzyVariable
 {
 	public Dictionary<FuzzyClass, double> MembershipValues { get; set; }
+	public Dictionary<FuzzyClass, float> DefuzzifyValues { get; set; }
 
 	public FuzzyVariable()
 	{
@@ -19,6 +20,12 @@ public class FuzzyVariable
 			{ FuzzyClass.low, 0 },
 			{ FuzzyClass.medium, 0 },
 			{ FuzzyClass.high, 0 }
+		};
+
+		DefuzzifyValues = new Dictionary<FuzzyClass, float>() {
+			{ FuzzyClass.low, 0f },
+			{ FuzzyClass.medium, 0.5f },
+			{ FuzzyClass.high, 1f }
 		};
 	}
 }
