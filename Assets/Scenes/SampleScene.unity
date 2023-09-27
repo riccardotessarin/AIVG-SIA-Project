@@ -969,6 +969,7 @@ MonoBehaviour:
   brakeAt: 1
   stopAt: 0.01
   fleeRange: 5
+  useFAM: 1
 --- !u!4 &628517977
 Transform:
   m_ObjectHideFlags: 0

@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour {
 	public float stopAt = 0.01f;
 	public float fleeRange = 5f;
 
+	public bool useFAM = true;
 
 	private void Awake() {
 		//Singleton method

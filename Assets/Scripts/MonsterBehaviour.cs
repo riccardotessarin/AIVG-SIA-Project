@@ -72,14 +72,16 @@ public class MonsterBehaviour : MonoBehaviour
 	private float maxPlayerDistance = 10f;
 	private float maxattackRange = 2f;
 
-	private enum MonsterState { calm, annoyed, replenish, angry, berserk };
+	
 	private MonsterState currentState;
+	private FAMBehaviour monsterFAM;
 	
     private void Awake() {
 		currentState = MonsterState.calm;
 		currentSpeed = monsterSpeed["roam"];
 		rb = GetComponent<Rigidbody>();
 		animator = GetComponent<Animator>();
+		monsterFAM = GetComponent<FAMBehaviour>();
 	}
 
 	// Start is called before the first frame update
@@ -209,9 +211,10 @@ public class MonsterBehaviour : MonoBehaviour
 
 		#endregion
 
-		monsterFSM = new FSM(calmState);
-
-		StartCoroutine(UpdateFSM());
+		if (!GameManager.Instance.useFAM) {
+			monsterFSM = new FSM(calmState);
+			StartCoroutine(UpdateFSM());
+		}
 		StartCoroutine(LivePhysicalStatus());
 		StartCoroutine(LiveMentalStatus());
 	}
@@ -598,7 +601,12 @@ public class MonsterBehaviour : MonoBehaviour
 		public float GetGrudge() {
 			return grudge;
 		}
-	
-	#endregion
+
+		public float GetReactionTime()
+		{
+			return reactionTime;
+		}
+
+    #endregion
 
 }

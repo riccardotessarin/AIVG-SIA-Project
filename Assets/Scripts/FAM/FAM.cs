@@ -28,6 +28,18 @@ public class FuzzyVariable
 			{ FuzzyClass.high, 1f }
 		};
 	}
+
+	public bool IsEqual(FuzzyVariable other)
+	{
+		foreach(KeyValuePair<FuzzyClass, float> entry in MembershipValues)
+		{
+			if (entry.Value != other.MembershipValues[entry.Key])
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 }
 
 /// <summary>

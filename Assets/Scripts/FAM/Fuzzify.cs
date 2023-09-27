@@ -101,7 +101,7 @@ public class Fuzzify
 		return fuzzyVariable;
 	}
 
-	public float DefuzzifyMax(FuzzyVariable fuzzyVariable)
+	public float DefuzzifyMax(FuzzyVariable fuzzyVariable, bool optimistic = true)
 	{
 		float max = 0.0f;
 		FuzzyClass maxFuzzyClass = FuzzyClass.low;
@@ -115,30 +115,20 @@ public class Fuzzify
 		// If we have duplicate membership values, we choose the one with the highest defuzzify value (optimistic) or the lowest (pessimistic)
 		foreach (var membershipValue in fuzzyVariable.MembershipValues) {
 			if (membershipValue.Value > max) {
-				max = (float) membershipValue.Value;
+				max = membershipValue.Value;
 				maxFuzzyClass = membershipValue.Key;
 			} else if (membershipValue.Value == max) {
 				if (fuzzyVariable.DefuzzifyValues[membershipValue.Key] > fuzzyVariable.DefuzzifyValues[maxFuzzyClass]) {
-					max = (float) membershipValue.Value;
-					maxFuzzyClass = membershipValue.Key;
+					// If it's pessimistic we just keep the lowest fuzzy class as max
+					if (optimistic) {
+						max = membershipValue.Value;
+						maxFuzzyClass = membershipValue.Key;
+					}
 				}
 			}
 		}
 
 		return fuzzyVariable.DefuzzifyValues[maxFuzzyClass];
-
-		//return (float) fuzzyVariable.MembershipValues.Max(kvp => kvp.Value);
-		/*
-		foreach (var membershipValue in fuzzyVariable.MembershipValues)
-		{
-			if (membershipValue.Value > max)
-			{
-				max = membershipValue.Value;
-				crispValue = (float)membershipValue.Key;
-			}
-		}
-		return crispValue;
-		*/
 	}
 
 	public float DefuzzifyMean(FuzzyVariable fuzzyVariable) {
@@ -146,8 +136,8 @@ public class Fuzzify
 		float total = 0.0f;
 		foreach (var membershipValue in fuzzyVariable.MembershipValues)
 		{
-			sum += (float)membershipValue.Value * fuzzyVariable.DefuzzifyValues[membershipValue.Key];
-			total += (float)membershipValue.Value;
+			sum += membershipValue.Value * fuzzyVariable.DefuzzifyValues[membershipValue.Key];
+			total += membershipValue.Value;
 		}
 		return sum / total;
 	}
