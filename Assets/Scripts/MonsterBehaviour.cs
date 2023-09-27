@@ -577,4 +577,28 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	#endregion
+
+	#region Getters
+		public float GetHealth() {
+			return health;
+		}
+	
+		public float GetHunger() {
+			return hunger;
+		}
+	
+		public float GetSleepiness() {
+			return sleepiness;
+		}
+	
+		public float GetStress() {
+			return stress;
+		}
+	
+		public float GetGrudge() {
+			return grudge;
+		}
+	
+	#endregion
+
 }

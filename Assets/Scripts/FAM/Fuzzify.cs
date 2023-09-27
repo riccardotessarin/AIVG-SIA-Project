@@ -6,14 +6,14 @@ using UnityEngine;
 public class Fuzzify
 {
 	//public string Name { get; set; }
-	public Dictionary<string, double[]> MembershipFunctions { get; set; }
+	public Dictionary<string, float[]> MembershipFunctions { get; set; }
 
 	public Fuzzify()
 	{
-		MembershipFunctions = new Dictionary<string, double[]>();
+		MembershipFunctions = new Dictionary<string, float[]>();
 	}
 
-	public void AddMembershipFunction(string functionName, double[] membershipParams)
+	public void AddMembershipFunction(string functionName, float[] membershipParams)
 	{
 		MembershipFunctions.Add(functionName, membershipParams);
 	}
@@ -25,25 +25,25 @@ public class Fuzzify
 	/// <param name="crispValue"></param>
 	/// <param name="functionName"></param>
 	/// <returns></returns>
-	public double CalculateTrapezoidalMembershipValue(double crispValue, string functionName)
+	public float CalculateTrapezoidalMembershipValue(float crispValue, string functionName)
 	{
-		double[] membershipParams = MembershipFunctions[functionName];
-		double a = membershipParams[0];
-		double b = membershipParams[1];
-		double c = membershipParams[2];
-		double d = membershipParams[3];
+		float[] membershipParams = MembershipFunctions[functionName];
+		float a = membershipParams[0];
+		float b = membershipParams[1];
+		float c = membershipParams[2];
+		float d = membershipParams[3];
 
-		double membershipValue = 0.0;
+		float membershipValue = 0.0f;
 
-		if (crispValue >= a && crispValue <= b)
+		if (crispValue >= a && crispValue < b)
 		{
 			membershipValue = (crispValue - a) / (b - a);
 		}
 		else if (crispValue >= b && crispValue <= c)
 		{
-			membershipValue = 1.0;
+			membershipValue = 1.0f;
 		}
-		else if (crispValue >= c && crispValue <= d)
+		else if (crispValue > c && crispValue <= d)
 		{
 			membershipValue = (d - crispValue) / (d - c);
 		}
@@ -51,42 +51,46 @@ public class Fuzzify
 		return membershipValue;
 	}
 
-	private double CalculateTriangularMembershipValue(double crispValue, string functionName)
-    {
-        double[] membershipParams = MembershipFunctions[functionName];
-        double a = membershipParams[0];
-        double b = membershipParams[1];
-        double c = membershipParams[2];
+	private float CalculateTriangularMembershipValue(float crispValue, string functionName)
+	{
+		float[] membershipParams = MembershipFunctions[functionName];
+		float a = membershipParams[0];
+		float b = membershipParams[1];
+		float c = membershipParams[2];
 
-        double membershipValue = 0.0;
+		float membershipValue = 0.0f;
 
-        if (crispValue >= a && crispValue <= b)
-        {
-            membershipValue = (crispValue - a) / (b - a);
-        }
-        else if (crispValue >= b && crispValue <= c)
-        {
-            membershipValue = (c - crispValue) / (c - b);
-        }
+		if (crispValue >= a && crispValue < b)
+		{
+			membershipValue = (crispValue - a) / (b - a);
+		}
+		else if (crispValue == b)
+		{
+			membershipValue = 1.0f;
+		}
+		else if (crispValue > b && crispValue <= c)
+		{
+			membershipValue = (c - crispValue) / (c - b);
+		}
 
-        return membershipValue;
-    }
+		return membershipValue;
+	}
 
-	public void ShowFuzzify(double crispValue)
+	public void ShowFuzzify(float crispValue)
 	{
 		foreach (var membershipFunction in MembershipFunctions)
 		{
-			double membershipValue = CalculateTrapezoidalMembershipValue(crispValue, membershipFunction.Key);
+			float membershipValue = CalculateTrapezoidalMembershipValue(crispValue, membershipFunction.Key);
 			Debug.Log("Membership value for " + membershipFunction.Key + ": " + membershipValue);
 		}
 	}
 
-	public FuzzyVariable ToFuzzy(double crispValue)
+	public FuzzyVariable ToFuzzy(float crispValue)
 	{
-		List<double> membershipValues = new List<double>();
+		List<float> membershipValues = new List<float>();
 		foreach (var membershipFunction in MembershipFunctions)
 		{
-			double membershipValue = CalculateTrapezoidalMembershipValue(crispValue, membershipFunction.Key);
+			float membershipValue = CalculateTrapezoidalMembershipValue(crispValue, membershipFunction.Key);
 			//Debug.Log("Membership value for " + membershipFunction.Key + ": " + membershipValue);
 			membershipValues.Add(membershipValue);
 		}

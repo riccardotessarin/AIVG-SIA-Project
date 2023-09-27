@@ -11,12 +11,12 @@ public enum FuzzyClass { low, medium, high };
 /// </summary>
 public class FuzzyVariable
 {
-	public Dictionary<FuzzyClass, double> MembershipValues { get; set; }
+	public Dictionary<FuzzyClass, float> MembershipValues { get; set; }
 	public Dictionary<FuzzyClass, float> DefuzzifyValues { get; set; }
 
 	public FuzzyVariable()
 	{
-		MembershipValues = new Dictionary<FuzzyClass, double>() {
+		MembershipValues = new Dictionary<FuzzyClass, float>() {
 			{ FuzzyClass.low, 0 },
 			{ FuzzyClass.medium, 0 },
 			{ FuzzyClass.high, 0 }

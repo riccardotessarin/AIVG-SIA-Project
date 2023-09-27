@@ -1578,7 +1578,9 @@ MonoBehaviour:
   fleeRange: 10
   fleeFrom: {fileID: 1323387881}
   targetRandomPosition: {x: 20, y: 1, z: 20}
+  lastSeenPosition: {x: 20, y: 1, z: 20}
   isFleeing: 0
+  isSeeking: 0
 --- !u!1 &1092981273
 GameObject:
   m_ObjectHideFlags: 0
@@ -2992,6 +2994,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 01cb405f4a361ae42af58e621514e503, type: 3}
+--- !u!1 &1510094866715987161 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1744448410892564741, guid: 01cb405f4a361ae42af58e621514e503, type: 3}
+  m_PrefabInstance: {fileID: 1510094866715987160}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1510094866715987162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1510094866715987161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bf2dc7cb47372b409873c4d0c8309a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1730869670376857050 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3804465372151261240, guid: 673ee1e619a52a044b07b515fbcd0d5e, type: 3}

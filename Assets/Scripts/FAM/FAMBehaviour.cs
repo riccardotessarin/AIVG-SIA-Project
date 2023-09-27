@@ -5,12 +5,13 @@ using UnityEngine;
 
 public class FAMBehaviour : MonoBehaviour
 {
+	private MonsterBehaviour monsterBehaviour;
 	private Fuzzify fuzzify;
-	double crispHealth = 25;
-	double crispHunger = 25;
-	double crispSleepiness = 25;
-	double crispStress = 75;
-	double crispGrudge = 15;
+	float crispHealth;
+	float crispHunger;
+	float crispSleepiness;
+	float crispStress;
+	float crispGrudge;
 	FuzzyVariable healthFuzzy;
 	FuzzyVariable hungerFuzzy;
 	FuzzyVariable sleepinessFuzzy;
@@ -29,16 +30,21 @@ public class FAMBehaviour : MonoBehaviour
 	void Awake()
 	{
 		fuzzify = new Fuzzify();
-		fuzzify.AddMembershipFunction("Low", new double[] { 0, 0, 20, 40 });
-		fuzzify.AddMembershipFunction("Medium", new double[] { 20, 40, 60, 80 });
-		fuzzify.AddMembershipFunction("High", new double[] { 60, 80, 100, 100 });
+		fuzzify.AddMembershipFunction("Low", new float[] { 0f, 0f, 20f, 40f });
+		fuzzify.AddMembershipFunction("Medium", new float[] { 20f, 40f, 60f, 80f });
+		fuzzify.AddMembershipFunction("High", new float[] { 60f, 80f, 100f, 100f });
+		monsterBehaviour = GetComponent<MonsterBehaviour>();
+		crispHealth = monsterBehaviour.GetHealth();
+		crispHunger = monsterBehaviour.GetHunger();
+		crispSleepiness = monsterBehaviour.GetSleepiness();
+		crispStress = monsterBehaviour.GetStress();
+		crispGrudge = monsterBehaviour.GetGrudge();
+		Debug.Log("Crisp values: " + crispHealth + ", " + crispHunger + ", " + crispSleepiness + ", " + crispStress + ", " + crispGrudge);
 	}
 
 	// Start is called before the first frame update
 	void Start()
 	{
-		
-		//health.Fuzzify(crispHealth);
 		healthFuzzy = fuzzify.ToFuzzy(crispHealth);
 		Debug.Log("Health fuzzy: " + healthFuzzy.MembershipValues[FuzzyClass.low] + ", " + healthFuzzy.MembershipValues[FuzzyClass.medium] + ", " + healthFuzzy.MembershipValues[FuzzyClass.high]);
 
