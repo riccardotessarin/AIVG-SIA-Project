@@ -30,16 +30,15 @@ public class FAMBehaviour : MonoBehaviour
 	void Awake()
 	{
 		fuzzify = new Fuzzify();
-		fuzzify.AddMembershipFunction("Low", new float[] { 0f, 0f, 20f, 40f });
-		fuzzify.AddMembershipFunction("Medium", new float[] { 20f, 40f, 60f, 80f });
-		fuzzify.AddMembershipFunction("High", new float[] { 60f, 80f, 100f, 100f });
+		fuzzify.AddMembershipFunction(FuzzyClass.low, new float[] { 0f, 0f, 20f, 40f });
+		fuzzify.AddMembershipFunction(FuzzyClass.medium, new float[] { 20f, 40f, 60f, 80f });
+		fuzzify.AddMembershipFunction(FuzzyClass.high, new float[] { 60f, 80f, 100f, 100f });
 		monsterBehaviour = GetComponent<MonsterBehaviour>();
 		crispHealth = monsterBehaviour.GetHealth();
 		crispHunger = monsterBehaviour.GetHunger();
 		crispSleepiness = monsterBehaviour.GetSleepiness();
 		crispStress = monsterBehaviour.GetStress();
 		crispGrudge = monsterBehaviour.GetGrudge();
-		Debug.Log("Crisp values: " + crispHealth + ", " + crispHunger + ", " + crispSleepiness + ", " + crispStress + ", " + crispGrudge);
 	}
 
 	// Start is called before the first frame update

@@ -6,14 +6,14 @@ using UnityEngine;
 public class Fuzzify
 {
 	//public string Name { get; set; }
-	public Dictionary<string, float[]> MembershipFunctions { get; set; }
+	public Dictionary<FuzzyClass, float[]> MembershipFunctions { get; set; }
 
 	public Fuzzify()
 	{
-		MembershipFunctions = new Dictionary<string, float[]>();
+		MembershipFunctions = new Dictionary<FuzzyClass, float[]>();
 	}
 
-	public void AddMembershipFunction(string functionName, float[] membershipParams)
+	public void AddMembershipFunction(FuzzyClass functionName, float[] membershipParams)
 	{
 		MembershipFunctions.Add(functionName, membershipParams);
 	}
@@ -25,7 +25,7 @@ public class Fuzzify
 	/// <param name="crispValue"></param>
 	/// <param name="functionName"></param>
 	/// <returns></returns>
-	public float CalculateTrapezoidalMembershipValue(float crispValue, string functionName)
+	public float CalculateTrapezoidalMembershipValue(float crispValue, FuzzyClass functionName)
 	{
 		float[] membershipParams = MembershipFunctions[functionName];
 		float a = membershipParams[0];
@@ -51,7 +51,7 @@ public class Fuzzify
 		return membershipValue;
 	}
 
-	private float CalculateTriangularMembershipValue(float crispValue, string functionName)
+	private float CalculateTriangularMembershipValue(float crispValue, FuzzyClass functionName)
 	{
 		float[] membershipParams = MembershipFunctions[functionName];
 		float a = membershipParams[0];
@@ -87,17 +87,17 @@ public class Fuzzify
 
 	public FuzzyVariable ToFuzzy(float crispValue)
 	{
-		List<float> membershipValues = new List<float>();
+		FuzzyVariable fuzzyVariable = new FuzzyVariable();
 		foreach (var membershipFunction in MembershipFunctions)
 		{
-			float membershipValue = CalculateTrapezoidalMembershipValue(crispValue, membershipFunction.Key);
-			//Debug.Log("Membership value for " + membershipFunction.Key + ": " + membershipValue);
-			membershipValues.Add(membershipValue);
+			if (membershipFunction.Value.Length == 3) {
+				fuzzyVariable.MembershipValues[membershipFunction.Key] = CalculateTriangularMembershipValue(crispValue, membershipFunction.Key);
+			} else if (membershipFunction.Value.Length == 4) {
+				fuzzyVariable.MembershipValues[membershipFunction.Key] = CalculateTrapezoidalMembershipValue(crispValue, membershipFunction.Key);	
+			} else {
+				Debug.LogError("Invalid membership function");
+			}
 		}
-		FuzzyVariable fuzzyVariable = new FuzzyVariable();
-		fuzzyVariable.MembershipValues[FuzzyClass.low] = membershipValues[0];
-		fuzzyVariable.MembershipValues[FuzzyClass.medium] = membershipValues[1];
-		fuzzyVariable.MembershipValues[FuzzyClass.high] = membershipValues[2];
 		return fuzzyVariable;
 	}
 
