@@ -11,6 +11,7 @@ public enum FuzzyClass { low, medium, high };
 /// </summary>
 public class FuzzyVariable
 {
+	public string Name { get; set; }
 	public Dictionary<FuzzyClass, float> MembershipValues { get; set; }
 	public Dictionary<FuzzyClass, float> DefuzzifyValues { get; set; }
 
@@ -39,6 +40,20 @@ public class FuzzyVariable
 			}
 		}
 		return true;
+	}
+
+	public void UpdateMembershipValues(FuzzyVariable other)
+	{
+		MembershipValues = other.MembershipValues;
+	}
+
+	public void ClearVariable()
+	{
+		MembershipValues = new Dictionary<FuzzyClass, float>() {
+			{ FuzzyClass.low, 0 },
+			{ FuzzyClass.medium, 0 },
+			{ FuzzyClass.high, 0 }
+		};
 	}
 }
 
@@ -90,7 +105,7 @@ public class FuzzyCondition
 			.OrderByDescending(kvp => kvp.Value)
 			.Select(kvp => kvp.Key).FirstOrDefault();
 
-			Debug.Log("SETCLASS IS: " + SetClass);
+			//Debug.Log(Variable.Name + " is: " + SetClass + " with value: " + Variable.MembershipValues[SetClass]);
 		}
 
 		switch (SetClass)
@@ -116,14 +131,28 @@ public class FuzzyConclusion
 public class FuzzyInferenceSystem
 {
 	public FuzzyRule[] Rules { get; set; }
-	public FuzzyVariable[] Inputs { get; set; }
+	public List<FuzzyVariable> Inputs { get; set; }
 	public FuzzyVariable[] Outputs { get; set; }
 
 	public void Calculate()
 	{
 		FuzzyRule[] trueRules = Rules.Where(rule => rule.Evaluate()).ToArray();
+		foreach (FuzzyVariable output in Outputs)
+		{
+			output.ClearVariable();
+		}
+
 		// We get the minimum membership value for each requested variable class
 		foreach (FuzzyRule rule in trueRules) {
+			/*
+			string writtenRule = "";
+			writtenRule += "TRUE RULE: " + rule.Conclusion.Variable.Name + " is " + rule.Conclusion.SetClass + " because ";
+			foreach (FuzzyCondition condition in rule.Conditions) {
+				writtenRule += condition.Variable.Name + " is " + condition.SetClass + ", ";
+				//Debug.Log("Values: " + condition.Variable.MembershipValues[FuzzyClass.low] + " " + condition.Variable.MembershipValues[FuzzyClass.medium] + " " + condition.Variable.MembershipValues[FuzzyClass.high]);
+			}
+			Debug.Log(writtenRule);
+			*/
 			rule.Conclusion.Variable.MembershipValues[rule.Conclusion.SetClass] = 
 			rule.Conditions.Min(condition => condition.Variable.MembershipValues[condition.SetClass]);
 		}
@@ -131,5 +160,34 @@ public class FuzzyInferenceSystem
 		for (int i = 0; i < Outputs.Length; i++) {
 			Outputs[i] = trueRules.Where(rule => rule.Conclusion.Variable == Outputs[i]).Select(rule => rule.Conclusion.Variable).FirstOrDefault();
 		}
+	}
+
+	/*
+	public void UpdateFuzzyVariables()
+	{
+		foreach (FuzzyVariable input in Inputs)
+		{
+			foreach (FuzzyRule rule in Rules)
+			{
+				foreach (FuzzyCondition condition in rule.Conditions)
+				{
+					if (condition.Variable.Name == input.Name)
+					{
+						condition.Variable = input;
+					}
+				}
+			}
+		}
+	}
+	*/
+
+	public FuzzyVariable GetSingleOutput()
+	{
+		return Outputs[0];
+	}
+
+	public FuzzyVariable[] GetOutputs()
+	{
+		return Outputs;
 	}
 }

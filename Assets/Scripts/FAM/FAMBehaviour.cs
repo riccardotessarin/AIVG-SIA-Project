@@ -26,6 +26,7 @@ public class FAMBehaviour : MonoBehaviour
 	FuzzyRule[] mentalRules;
 	FuzzyInferenceSystem physicalFIS;
 	FuzzyInferenceSystem mentalFIS;
+	private bool useDefuzzyMean = true;
 	float lowThreshold = 0.3f;
 	float highThreshold = 0.7f;
 	private float reactionTime;
@@ -46,27 +47,23 @@ public class FAMBehaviour : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
 	{
-		healthFuzzy = fuzzify.ToFuzzy(crispHealth);
-		Debug.Log("Health fuzzy: " + healthFuzzy.MembershipValues[FuzzyClass.low] + ", " + healthFuzzy.MembershipValues[FuzzyClass.medium] + ", " + healthFuzzy.MembershipValues[FuzzyClass.high]);
-
-		hungerFuzzy = fuzzify.ToFuzzy(crispHunger);
-		Debug.Log("Hunger fuzzy: " + hungerFuzzy.MembershipValues[FuzzyClass.low] + ", " + hungerFuzzy.MembershipValues[FuzzyClass.medium] + ", " + hungerFuzzy.MembershipValues[FuzzyClass.high]);
-		sleepinessFuzzy = fuzzify.ToFuzzy(crispSleepiness);
-		Debug.Log("Sleepiness fuzzy: " + sleepinessFuzzy.MembershipValues[FuzzyClass.low] + ", " + sleepinessFuzzy.MembershipValues[FuzzyClass.medium] + ", " + sleepinessFuzzy.MembershipValues[FuzzyClass.high]);
-
-		// Make empty fuzzy variable for the output
-		physicalstatus = new FuzzyVariable();
-
-
-		stressFuzzy = fuzzify.ToFuzzy(crispStress);
-		Debug.Log("Stress fuzzy: " + stressFuzzy.MembershipValues[FuzzyClass.low] + ", " + stressFuzzy.MembershipValues[FuzzyClass.medium] + ", " + stressFuzzy.MembershipValues[FuzzyClass.high]);
-		//Debug.Log("Stress fuzzy: " + stressFuzzy.Low + ", " + stressFuzzy.Medium + ", " + stressFuzzy.High);
-		grudgeFuzzy = fuzzify.ToFuzzy(crispGrudge);
-		Debug.Log("Grudge fuzzy: " + grudgeFuzzy.MembershipValues[FuzzyClass.low] + ", " + grudgeFuzzy.MembershipValues[FuzzyClass.medium] + ", " + grudgeFuzzy.MembershipValues[FuzzyClass.high]);
-		//Debug.Log("Grudge fuzzy: " + grudgeFuzzy.Low + ", " + grudgeFuzzy.Medium + ", " + grudgeFuzzy.High);
+		healthFuzzy = fuzzify.ToFuzzy("health", crispHealth);
+		//Debug.Log("Health fuzzy: " + healthFuzzy.MembershipValues[FuzzyClass.low] + ", " + healthFuzzy.MembershipValues[FuzzyClass.medium] + ", " + healthFuzzy.MembershipValues[FuzzyClass.high]);
+		hungerFuzzy = fuzzify.ToFuzzy("hunger", crispHunger);
+		//Debug.Log("Hunger fuzzy: " + hungerFuzzy.MembershipValues[FuzzyClass.low] + ", " + hungerFuzzy.MembershipValues[FuzzyClass.medium] + ", " + hungerFuzzy.MembershipValues[FuzzyClass.high]);
+		sleepinessFuzzy = fuzzify.ToFuzzy("sleepiness", crispSleepiness);
+		//Debug.Log("Sleepiness fuzzy: " + sleepinessFuzzy.MembershipValues[FuzzyClass.low] + ", " + sleepinessFuzzy.MembershipValues[FuzzyClass.medium] + ", " + sleepinessFuzzy.MembershipValues[FuzzyClass.high]);
 
 		// Make empty fuzzy variable for the output
-		mentalstatus = new FuzzyVariable();
+		physicalstatus = new FuzzyVariable() { Name = "physicalstatus" };
+
+		stressFuzzy = fuzzify.ToFuzzy("stress", crispStress);
+		//Debug.Log("Stress fuzzy: " + stressFuzzy.MembershipValues[FuzzyClass.low] + ", " + stressFuzzy.MembershipValues[FuzzyClass.medium] + ", " + stressFuzzy.MembershipValues[FuzzyClass.high]);
+		grudgeFuzzy = fuzzify.ToFuzzy("grudge", crispGrudge);
+		//Debug.Log("Grudge fuzzy: " + grudgeFuzzy.MembershipValues[FuzzyClass.low] + ", " + grudgeFuzzy.MembershipValues[FuzzyClass.medium] + ", " + grudgeFuzzy.MembershipValues[FuzzyClass.high]);
+
+		// Make empty fuzzy variable for the output
+		mentalstatus = new FuzzyVariable() { Name = "mentalstatus" };
 
 		physicalRules = new FuzzyRule[]
 		{
@@ -218,7 +215,7 @@ public class FAMBehaviour : MonoBehaviour
 		physicalFIS = new FuzzyInferenceSystem
 		{
 			Rules = physicalRules,
-			Inputs = new FuzzyVariable[] { healthFuzzy, hungerFuzzy, sleepinessFuzzy },
+			Inputs = new List<FuzzyVariable> { healthFuzzy, hungerFuzzy, sleepinessFuzzy },
 			Outputs = new FuzzyVariable[] { physicalstatus }
 		};
 
@@ -226,7 +223,7 @@ public class FAMBehaviour : MonoBehaviour
 		mentalFIS = new FuzzyInferenceSystem
 		{
 			Rules = mentalRules,
-			Inputs = new FuzzyVariable[] { stressFuzzy, grudgeFuzzy },
+			Inputs = new List<FuzzyVariable> { stressFuzzy, grudgeFuzzy },
 			Outputs = new FuzzyVariable[] { mentalstatus }
 		};
 
@@ -238,23 +235,30 @@ public class FAMBehaviour : MonoBehaviour
 		Debug.Log("Physical status: " + physicalstatus.MembershipValues[FuzzyClass.low] + ", " + physicalstatus.MembershipValues[FuzzyClass.medium] + ", " + physicalstatus.MembershipValues[FuzzyClass.high]);
 
 		// Get the output values
-		//double physicalStatusValue = Math.Max(physicalstatus.MembershipValues[FuzzyClass.low], Math.Max(physicalstatus.MembershipValues[FuzzyClass.medium], physicalstatus.MembershipValues[FuzzyClass.high]));
 		physicalStatusValue = fuzzify.DefuzzifyMax(physicalstatus);
-		float physicalStatusValueMean = fuzzify.DefuzzifyMean(physicalstatus);
-		Debug.Log("Physical status value max: " + physicalStatusValue + " Mean: " + physicalStatusValueMean);
+		Debug.Log("Physical status value max: " + physicalStatusValue);
 
 		// Get the output values
-		//double mentalStatusValue = Math.Max(mentalstatus.MembershipValues[FuzzyClass.low], Math.Max(mentalstatus.MembershipValues[FuzzyClass.medium], mentalstatus.MembershipValues[FuzzyClass.high]));
-		//double mentalStatusValue = Math.Max(mentalstatus.Low, Math.Max(mentalstatus.Medium, mentalstatus.High));
 		mentalStatusValue = fuzzify.DefuzzifyMax(mentalstatus);
-		float mentalStatusValueMean = fuzzify.DefuzzifyMean(mentalstatus);
-		Debug.Log("Mental status value max: " + mentalStatusValue + " Mean: " + mentalStatusValueMean);
+		Debug.Log("Mental status value max: " + mentalStatusValue);
 
 		currentState = UpdateState();
 		Debug.Log("Current state: " + currentState);
 
+		//crispHealth = 25f;
+		//healthFuzzy = fuzzify.ToFuzzy("health", crispHealth);
+		//healthFuzzy.UpdateMembershipValues(fuzzify.ToFuzzy("health", crispHealth));
+		//Debug.Log("Health fuzzy: " + healthFuzzy.MembershipValues[FuzzyClass.low] + ", " + healthFuzzy.MembershipValues[FuzzyClass.medium] + ", " + healthFuzzy.MembershipValues[FuzzyClass.high]);
+		//physicalFIS.Inputs = new List<FuzzyVariable> { healthFuzzy };
+		//physicalFIS.UpdateFuzzyVariables();
+		//physicalFIS.Calculate();
+		//physicalstatus = physicalFIS.GetSingleOutput();
+		//Debug.Log("Physical output: " + physicalstatus.Name + " " + physicalstatus.MembershipValues[FuzzyClass.low] + " " + physicalstatus.MembershipValues[FuzzyClass.medium] + " " + physicalstatus.MembershipValues[FuzzyClass.high]);
+		//physicalStatusValue = fuzzify.DefuzzifyMax(physicalstatus);
+		//Debug.Log("Physical status value max: " + physicalStatusValue);
+
 		if(GameManager.Instance.useFAM) {
-			//StartCoroutine(UpdateCoroutine());
+			StartCoroutine(UpdateCoroutine());
 		}
 	}
 
@@ -274,9 +278,10 @@ public class FAMBehaviour : MonoBehaviour
 		crispGrudge = monsterBehaviour.GetGrudge();
 	}
 
-	private bool UpdateFuzzyParam(ref FuzzyVariable fuzzyVariable, float crispValue) {
-		if (!fuzzyVariable.IsEqual(fuzzify.ToFuzzy(crispValue))) {
-			fuzzyVariable = fuzzify.ToFuzzy(crispValue);
+	private bool UpdateFuzzyParam(ref FuzzyVariable fuzzyVariable, string name, float crispValue) {
+		FuzzyVariable otherFuzzyVariable = fuzzify.ToFuzzy(name, crispValue);
+		if (!fuzzyVariable.IsEqual(otherFuzzyVariable)) {
+			fuzzyVariable.UpdateMembershipValues(otherFuzzyVariable);
 			return true;
 		}
 		return false;
@@ -286,23 +291,53 @@ public class FAMBehaviour : MonoBehaviour
 		physicalParamsChanged = false;
 		mentalParamsChanged = false;
 		
-		if (UpdateFuzzyParam(ref healthFuzzy, crispHealth)) {
+		if (UpdateFuzzyParam(ref healthFuzzy, "health", crispHealth)) {
 			physicalParamsChanged = true;
 		}
-		if (UpdateFuzzyParam(ref hungerFuzzy, crispHunger)) {
+		if (UpdateFuzzyParam(ref hungerFuzzy, "hunger", crispHunger)) {
 			physicalParamsChanged = true;
 		}
-		if (UpdateFuzzyParam(ref sleepinessFuzzy, crispSleepiness)) {
+		if (UpdateFuzzyParam(ref sleepinessFuzzy, "sleepiness", crispSleepiness)) {
 			physicalParamsChanged = true;
 		}
 		
-		if (UpdateFuzzyParam(ref stressFuzzy, crispStress)) {
+		if (UpdateFuzzyParam(ref stressFuzzy, "stress", crispStress)) {
 			mentalParamsChanged = true;
 		}
-		if (UpdateFuzzyParam(ref grudgeFuzzy, crispGrudge)) {
+		if (UpdateFuzzyParam(ref grudgeFuzzy, "grudge", crispGrudge)) {
 			mentalParamsChanged = true;
 		}
 	}
+
+	/*
+	private bool UpdateFuzzyParam(ref FuzzyVariable fuzzyVariable, string name, float crispValue) {
+		if (!fuzzyVariable.IsEqual(fuzzify.ToFuzzy(name, crispValue))) {
+			fuzzyVariable = fuzzify.ToFuzzy(name, crispValue);
+			return true;
+		}
+		return false;
+	}
+
+
+	private void ParamsToFuzzy(List<FuzzyVariable> physicalParamsChanged, List<FuzzyVariable> mentalParamsChanged) {		
+		if (UpdateFuzzyParam(ref healthFuzzy, "health", crispHealth)) {
+			physicalParamsChanged.Add(healthFuzzy);
+		}
+		if (UpdateFuzzyParam(ref hungerFuzzy, "hunger", crispHunger)) {
+			physicalParamsChanged.Add(hungerFuzzy);
+		}
+		if (UpdateFuzzyParam(ref sleepinessFuzzy, "sleepiness", crispSleepiness)) {
+			physicalParamsChanged.Add(sleepinessFuzzy);
+		}
+		
+		if (UpdateFuzzyParam(ref stressFuzzy, "stress", crispStress)) {
+			mentalParamsChanged.Add(stressFuzzy);
+		}
+		if (UpdateFuzzyParam(ref grudgeFuzzy, "grudge", crispGrudge)) {
+			mentalParamsChanged.Add(grudgeFuzzy);
+		}
+	}
+	*/
 
 	public MonsterState UpdateState() {
 		// Determine the NPC state based on the output values
@@ -331,29 +366,33 @@ public class FAMBehaviour : MonoBehaviour
 	}
 
 	public void UpdateFAM() {
-		Debug.Log("Updating FAM");
+		//Debug.Log("Updating FAM");
 		GetMonsterParams();
 		bool physicalParamsChanged;
 		bool mentalParamsChanged;
 
 		ParamsToFuzzy(out physicalParamsChanged, out mentalParamsChanged);
 		if (!physicalParamsChanged && !mentalParamsChanged) {
-			Debug.Log("No fuzzy variables changed");
+			//Debug.Log("No fuzzy variables changed");
 			return;
 		}
 		if (physicalParamsChanged) {
-			Debug.Log("Physical fuzzy variables changed");
+			//Debug.Log("Physical fuzzy variables changed");
+			//physicalFIS.Inputs = physicalParamsChanged;
+			//physicalFIS.UpdateFuzzyVariables();
 			physicalFIS.Calculate();
-			physicalStatusValue = fuzzify.DefuzzifyMax(physicalstatus);
-			Debug.Log("Physical status value max: " + physicalStatusValue);
+			physicalstatus = physicalFIS.GetSingleOutput();
+			physicalStatusValue = useDefuzzyMean ? fuzzify.DefuzzifyMean(physicalstatus) : fuzzify.DefuzzifyMax(physicalstatus);
+			Debug.Log("Defuzzy physical status value: " + physicalStatusValue);
 		}
 		if (mentalParamsChanged) {
-			Debug.Log("Mental fuzzy variables changed");
-			Debug.Log("Mental status before fis: " + mentalstatus.MembershipValues[FuzzyClass.low] + ", " + mentalstatus.MembershipValues[FuzzyClass.medium] + ", " + mentalstatus.MembershipValues[FuzzyClass.high]);
+			//Debug.Log("Mental fuzzy variables changed");
+			//mentalFIS.Inputs = mentalParamsChanged;
+			//mentalFIS.UpdateFuzzyVariables();
 			mentalFIS.Calculate();
-			Debug.Log("Mental status after fis: " + mentalstatus.MembershipValues[FuzzyClass.low] + ", " + mentalstatus.MembershipValues[FuzzyClass.medium] + ", " + mentalstatus.MembershipValues[FuzzyClass.high]);
-			mentalStatusValue = fuzzify.DefuzzifyMax(mentalstatus);
-			Debug.Log("Mental status value max: " + mentalStatusValue);
+			mentalstatus = mentalFIS.GetSingleOutput();
+			mentalStatusValue = useDefuzzyMean ? fuzzify.DefuzzifyMean(mentalstatus) : fuzzify.DefuzzifyMax(mentalstatus);
+			Debug.Log("Defuzzy mental status value: " + mentalStatusValue);
 		}
 		if (currentState != UpdateState()) {
 			Debug.Log("State changed from " + currentState + " to " + UpdateState());

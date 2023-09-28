@@ -85,10 +85,10 @@ public class Fuzzify
 		}
 	}
 
-	public FuzzyVariable ToFuzzy(float crispValue)
+	public FuzzyVariable ToFuzzy(string name, float crispValue)
 	{
-		FuzzyVariable fuzzyVariable = new FuzzyVariable();
-		foreach (var membershipFunction in MembershipFunctions)
+        FuzzyVariable fuzzyVariable = new FuzzyVariable { Name = name };
+        foreach (var membershipFunction in MembershipFunctions)
 		{
 			if (membershipFunction.Value.Length == 3) {
 				fuzzyVariable.MembershipValues[membershipFunction.Key] = CalculateTriangularMembershipValue(crispValue, membershipFunction.Key);
