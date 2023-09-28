@@ -6,7 +6,8 @@ using UnityEngine;
 public class FAMBehaviour : MonoBehaviour
 {
 	private MonsterBehaviour monsterBehaviour;
-	private MonsterState currentState;
+	private FAMState currentState;
+	private Dictionary<MonsterState, FAMState> states;
 	private Fuzzify fuzzify;
 	float crispHealth;
 	float crispHunger;
@@ -42,6 +43,33 @@ public class FAMBehaviour : MonoBehaviour
 		fuzzify.AddMembershipFunction(FuzzyClass.high, new float[] { 60f, 80f, 100f, 100f });
 		monsterBehaviour = GetComponent<MonsterBehaviour>();
 		GetMonsterParams();
+		states = new Dictionary<MonsterState, FAMState>();
+		FAMState calm = new FAMState(MonsterState.calm);
+		calm.enterActions.Add(monsterBehaviour.StartRoaming);
+		calm.exitActions.Add(monsterBehaviour.StopRoaming);
+		states.Add(MonsterState.calm, calm);
+		FAMState annoyed = new FAMState(MonsterState.annoyed);
+		annoyed.enterActions.Add(monsterBehaviour.StartFleeing);
+		annoyed.stayActions.Add(monsterBehaviour.IncreaseGrudge);
+		annoyed.stayActions.Add(monsterBehaviour.Flee);
+		annoyed.exitActions.Add(monsterBehaviour.StopFleeing);
+		states.Add(MonsterState.annoyed, annoyed);
+		FAMState angry = new FAMState(MonsterState.angry);
+		angry.enterActions.Add(monsterBehaviour.StartAngry);
+		angry.stayActions.Add(monsterBehaviour.IncreaseGrudge);
+		angry.stayActions.Add(monsterBehaviour.AngryAttack);
+		angry.exitActions.Add(monsterBehaviour.StopAngry);
+		states.Add(MonsterState.angry, angry);
+		FAMState berserk = new FAMState(MonsterState.berserk);
+		berserk.enterActions.Add(monsterBehaviour.StartBerserk);
+		berserk.stayActions.Add(monsterBehaviour.IncreaseGrudge);
+		berserk.stayActions.Add(monsterBehaviour.BerserkAttack);
+		berserk.exitActions.Add(monsterBehaviour.StopBerserk);
+		states.Add(MonsterState.berserk, berserk);
+		FAMState replenish = new FAMState(MonsterState.replenish);
+		replenish.enterActions.Add(monsterBehaviour.StartReplenishing);
+		replenish.exitActions.Add(monsterBehaviour.StopReplenishing);
+		states.Add(MonsterState.replenish, replenish);
 	}
 
 	// Start is called before the first frame update
@@ -243,7 +271,8 @@ public class FAMBehaviour : MonoBehaviour
 		Debug.Log("Mental status value max: " + mentalStatusValue);
 
 		currentState = UpdateState();
-		Debug.Log("Current state: " + currentState);
+		Debug.Log("Current state: " + currentState.stateName);
+		currentState.Enter();
 
 		//crispHealth = 25f;
 		//healthFuzzy = fuzzify.ToFuzzy("health", crispHealth);
@@ -339,22 +368,27 @@ public class FAMBehaviour : MonoBehaviour
 	}
 	*/
 
-	public MonsterState UpdateState() {
+	public FAMState UpdateState() {
 		// Determine the NPC state based on the output values
 		if (physicalStatusValue < lowThreshold) {
 			if (mentalStatusValue < lowThreshold) {
-				return MonsterState.berserk;
+				return states[MonsterState.berserk];
+				//return MonsterState.berserk;
 			}
-			return MonsterState.replenish;
+			return states[MonsterState.replenish];
+			//return MonsterState.replenish;
 		} else {
 			switch (mentalStatusValue)
 			{
 				case float n when (n < lowThreshold):
-					return MonsterState.angry;
+					return states[MonsterState.angry];
+					//return MonsterState.angry;
 				case float n when (n >= lowThreshold && n < highThreshold):
-					return MonsterState.annoyed;
+					return states[MonsterState.annoyed];
+					//return MonsterState.annoyed;
 				default:
-					return MonsterState.calm;
+					return states[MonsterState.calm];
+					//return MonsterState.calm;
 			}
 		}
 	}
@@ -394,12 +428,12 @@ public class FAMBehaviour : MonoBehaviour
 			mentalStatusValue = useDefuzzyMean ? fuzzify.DefuzzifyMean(mentalstatus) : fuzzify.DefuzzifyMax(mentalstatus);
 			Debug.Log("Defuzzy mental status value: " + mentalStatusValue);
 		}
-		if (currentState != UpdateState()) {
-			Debug.Log("State changed from " + currentState + " to " + UpdateState());
-			// Exit old state
-			currentState = UpdateState();
-			// Enter new state
+		if (UpdateState() is FAMState transition && currentState != transition) {
+			Debug.Log("State changed from " + currentState.stateName + " to " + transition.stateName);
+			currentState.Exit(); // Exit old state
+			currentState = transition;
+			currentState.Enter(); // Enter new state
 		}
-		// Stay in current state
+		currentState.Stay(); // Stay in current state
 	}
 }
