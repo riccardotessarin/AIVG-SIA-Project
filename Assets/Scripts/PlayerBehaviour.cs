@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour {
-	public float health = 100.0f;
+	private float maxHealth = 100.0f;
+	public float health;
+	public ScreenFlash screenFlash;
+	public HealthBar healthBar;
 	private Transform headTransform;
 	private GameObject currentDevice;
 	private GameObject rock;
@@ -13,6 +16,8 @@ public class PlayerBehaviour : MonoBehaviour {
 	public void TakeDamage(float damage) {
 		// Only for demo purposes, the player can't die
 		health = health - damage > 0 ? health - damage : 0;
+		screenFlash.StartFlash(0.2f, 0.5f, Color.red);
+		healthBar.SetHealth(health);
 	}
 
 	/// <summary>
@@ -20,7 +25,9 @@ public class PlayerBehaviour : MonoBehaviour {
 	/// </summary>
 	void Awake()
 	{
+		health = maxHealth;
 		headTransform = transform.GetChild(2);
+		healthBar.SetMaxHealth(maxHealth);
 	}
 
 	// Start is called before the first frame update

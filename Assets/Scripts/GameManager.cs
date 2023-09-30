@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using JohnStairs.RCC.Inputs;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,6 +15,7 @@ public class GameManager : MonoBehaviour {
 	public static GameManager Instance { get { return instance; }}
 
 	public static bool GameIsPaused = false;
+	public GameObject pauseMenuUI;
 
 	public GameState state;
 	bool gameHasEnded = false;
@@ -31,6 +33,9 @@ public class GameManager : MonoBehaviour {
 	public float fleeRange = 5f;
 
 	public bool useFAM = true;
+	public GameObject FAMtoggleUI;
+	public bool easyMode = true;
+	public GameObject easyModeToggleUI;
 
 	private void Awake() {
 		//Singleton method
@@ -61,11 +66,13 @@ public class GameManager : MonoBehaviour {
 
 	private void Start() {
 		UpdateGameState(instance.state);
+		FAMtoggleUI.GetComponent<Toggle>().isOn = useFAM;
+		easyModeToggleUI.GetComponent<Toggle>().isOn = easyMode;
 	}
 
 	private void Update() {
-		if ( Input.GetKeyUp(KeyCode.Escape) ) {
-			QuitGame();
+		if ( Input.GetKeyDown(KeyCode.Escape) ) {
+			Pause();
 		}
 	}
 
@@ -111,16 +118,19 @@ public class GameManager : MonoBehaviour {
 		Application.Quit();
 	}
 
-	
-	private IEnumerator ShowFeedback(Image image, float timeToShow) {
-		image.gameObject.SetActive(true);
-		yield return new WaitForSeconds(timeToShow);
-		image.gameObject.SetActive(false);
+	public void SetUseFAM(bool value) {
+		useFAM = value;
+	}
+
+	public void SetEasyMode(bool value) {
+		easyMode = value;
 	}
 
 
 	public void Pause() {
 		if( !GameIsPaused ) {
+			RPGInputManager.DisableInputActions();
+			pauseMenuUI.SetActive(true);
 			Time.timeScale = 0f;
 			GameIsPaused = true;
 			AudioListener.pause = true;
@@ -129,6 +139,8 @@ public class GameManager : MonoBehaviour {
 
 	public void Resume() {
 		if ( GameIsPaused ) {
+			pauseMenuUI.SetActive(false);
+			RPGInputManager.EnableInputActions();
 			Time.timeScale = 1f;
 			GameIsPaused = false;
 			AudioListener.pause = false;
