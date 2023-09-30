@@ -260,6 +260,7 @@ public class MonsterBehaviour : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.Return)) {
 			Debug.Log("Current stats: " + health + " " + hunger + " " + sleepiness + " " + stress + " " + grudge);
 		}
+		/*
 		if (Input.GetKeyDown(KeyCode.Space)) {
 			health = 100f;
 			hunger = 0f;
@@ -279,6 +280,7 @@ public class MonsterBehaviour : MonoBehaviour
 			grudge += 20f;
 			Debug.Log("Grudge: " + grudge);
 		}
+		*/
 	}
 	
 	
