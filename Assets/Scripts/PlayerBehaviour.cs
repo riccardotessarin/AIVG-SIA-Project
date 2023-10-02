@@ -14,10 +14,13 @@ public class PlayerBehaviour : MonoBehaviour {
 	private GameObject axe;
 
 	public void TakeDamage(float damage) {
-		// Only for demo purposes, the player can't die
 		health = health - damage > 0 ? health - damage : 0;
 		screenFlash.StartFlash(0.2f, 0.5f, Color.red);
 		healthBar.SetHealth(health);
+		// Only for demo purposes, the player can't die in easy mode
+		if (health == 0 && !GameManager.Instance.easyMode) {
+			GameManager.Instance.GameOver();
+		}
 	}
 
 	/// <summary>
@@ -43,15 +46,15 @@ public class PlayerBehaviour : MonoBehaviour {
 	void Update()
 	{
 		if (Input.GetKeyDown(KeyCode.Alpha1)) {
-			Debug.Log("Selected Rock");
+			GameManager.Instance.SetGameMessage("Rock Equipped");
 			currentDevice = rock;
 		}
 		if (Input.GetKeyDown(KeyCode.Alpha2)) {
-			Debug.Log("Selected Dart");
+			GameManager.Instance.SetGameMessage("Dart Equipped");
 			currentDevice = dart;
 		}
 		if (Input.GetKeyDown(KeyCode.Alpha3)) {
-			Debug.Log("Selected Axe");
+			GameManager.Instance.SetGameMessage("Axe Equipped");
 			currentDevice = axe;
 		}
 		if (Input.GetKeyDown(KeyCode.T)) {

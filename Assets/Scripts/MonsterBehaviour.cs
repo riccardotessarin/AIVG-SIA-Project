@@ -260,7 +260,7 @@ public class MonsterBehaviour : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.Return)) {
 			Debug.Log("Current stats: " + health + " " + hunger + " " + sleepiness + " " + stress + " " + grudge);
 		}
-		/*
+		
 		if (Input.GetKeyDown(KeyCode.Space)) {
 			health = 100f;
 			hunger = 0f;
@@ -280,7 +280,7 @@ public class MonsterBehaviour : MonoBehaviour
 			grudge += 20f;
 			Debug.Log("Grudge: " + grudge);
 		}
-		*/
+
 	}
 	
 	
@@ -579,6 +579,10 @@ public class MonsterBehaviour : MonoBehaviour
 		grudgeDamage *= rageMultiplier[currentState];
 		stress = stress + stressDamage > 100f ? 100f : stress + stressDamage;
 		grudge = grudge + grudgeDamage > 100f ? 100f : grudge + grudgeDamage;
+		Debug.Log("Easy Mode: " + GameManager.Instance.easyMode);
+		if (health == 0f && !GameManager.Instance.easyMode) {
+			GameManager.Instance.GameOver();
+		}
 	}
 
 	#endregion

@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour {
 
 	public GameState state;
 	bool gameHasEnded = false;
+	public GameObject gameOverUI;
 	public static event Action<GameState> GameStateChanged;
 
 	public float sightRange = 2f;
@@ -33,9 +34,12 @@ public class GameManager : MonoBehaviour {
 	public float fleeRange = 5f;
 
 	public bool useFAM = true;
-	public GameObject FAMtoggleUI;
+	public GameObject FAMToggleUI;
 	public bool easyMode = true;
 	public GameObject easyModeToggleUI;
+	public GameObject gameMessagesUI;
+	private TextMeshProUGUI gameMessagesText;
+
 
 	private void Awake() {
 		//Singleton method
@@ -44,30 +48,16 @@ public class GameManager : MonoBehaviour {
 			instance = this;
 			instance.state = GameState.Play;
 			
-			DontDestroyOnLoad(gameObject);
+			// DontDestroyOnLoad(gameObject);
  
-		} else if ( instance != this ) {
-			//Instance is not the same as the one we have, destroy old one, and reset to newest one
-			GameState gs = instance.state;
-			instance = this;
-			instance.state = gs;
-			/*
-			GameDifficulty gd = Instance.gameDifficulty;
-			//Debug.Log(gs);
-			Destroy(Instance.gameObject);
-			Instance = this;
-			Instance.state = gs;
-			Instance.gameDifficulty = gd;
-			Debug.Log(gameDifficulty.difficulty);
-			*/
-			DontDestroyOnLoad(gameObject);
 		}
 	}
 
 	private void Start() {
 		UpdateGameState(instance.state);
-		FAMtoggleUI.GetComponent<Toggle>().isOn = useFAM;
+		FAMToggleUI.GetComponent<Toggle>().isOn = useFAM;
 		easyModeToggleUI.GetComponent<Toggle>().isOn = easyMode;
+		gameMessagesText = gameMessagesUI.GetComponent<TextMeshProUGUI>();
 	}
 
 	private void Update() {
@@ -84,6 +74,8 @@ public class GameManager : MonoBehaviour {
 				break;
 			case GameState.Pause:
 				break;
+			case GameState.GameOver:
+				break;
 			default:
 				throw new ArgumentOutOfRangeException();
 		}
@@ -91,26 +83,24 @@ public class GameManager : MonoBehaviour {
 		if ( GameStateChanged != null ) GameStateChanged.Invoke(newState);
 	}
 
-	private IEnumerator HandleGameWin() {
+	public void GameOver() {
 		if ( gameHasEnded == false ) {
 			gameHasEnded = true;
-			yield return new WaitForSeconds(5f);
-			//Victory();
-		}
-	}
-
-	private void HandleGameLose() {
-		
-		if ( gameHasEnded == false ) {
-			gameHasEnded = true;
-			//Defeat();
+			RPGInputManager.DisableInputActions();
+			gameOverUI.SetActive(true);
+			Time.timeScale = 0f;
+			AudioListener.pause = true;
 		}
 	}
 
 	// Restart game if player clicks on restart button
 	public void RestartGame() {
 		gameHasEnded = false;
-		UpdateGameState(GameState.Play);
+		RPGInputManager.EnableInputActions();
+		gameOverUI.SetActive(false);
+		Time.timeScale = 1f;
+		AudioListener.pause = false;
+		//UpdateGameState(GameState.Play);
 		SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 	}
 	
@@ -146,11 +136,30 @@ public class GameManager : MonoBehaviour {
 			AudioListener.pause = false;
 		}
 	}
+
+	private Coroutine messageCoroutine;
+	public void SetGameMessage(string message) {
+		if ( messageCoroutine != null ) {
+			StopCoroutine(messageCoroutine);
+		}
+		messageCoroutine = StartCoroutine(ShowMessage(message, 1f, 1f));
+	}
+
+	private IEnumerator ShowMessage(string message, float visibleTime, float fadeTime) {
+		gameMessagesText.text = message;
+		gameMessagesText.alpha = 1f;
+		yield return new WaitForSeconds(visibleTime);
+		for ( float t = 0f; t <= fadeTime; t += Time.deltaTime ) {
+			gameMessagesText.alpha = Mathf.Lerp(1f, 0f, t / fadeTime);
+			yield return null;
+		}
+	}
 }
 
 public enum GameState {
 	Play,
-	Pause
+	Pause,
+	GameOver
 }
 
 
