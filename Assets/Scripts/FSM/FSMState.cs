@@ -8,7 +8,7 @@ public delegate void FSMAction();
 
 public class FSMState: IDTNode {
 
-	public string stateName;
+	public MonsterState stateName;
 
 	// Arrays of actions to perform based on transitions fire (or not)
 	// Getters and setters are preferable, but we want to keep the source clean
@@ -22,7 +22,7 @@ public class FSMState: IDTNode {
 	// A decision tree to evaluate transitions
 	public DecisionTree transionTree;
 
-	public FSMState(string name) {
+	public FSMState(MonsterState name) {
 		stateName = name;
 		//links = new Dictionary<FSMTransition, FSMState>();
 	}

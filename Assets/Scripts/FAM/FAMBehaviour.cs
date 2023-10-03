@@ -6,6 +6,7 @@ using UnityEngine;
 public class FAMBehaviour : MonoBehaviour
 {
 	private MonsterBehaviour monsterBehaviour;
+	private Coroutine coroutineFAM;
 	private FAMState currentState;
 	private Dictionary<MonsterState, FAMState> states;
 	private Fuzzify fuzzify;
@@ -272,7 +273,6 @@ public class FAMBehaviour : MonoBehaviour
 
 		currentState = UpdateState();
 		Debug.Log("Current state: " + currentState.stateName);
-		currentState.Enter();
 
 		//crispHealth = 25f;
 		//healthFuzzy = fuzzify.ToFuzzy("health", crispHealth);
@@ -287,7 +287,8 @@ public class FAMBehaviour : MonoBehaviour
 		//Debug.Log("Physical status value max: " + physicalStatusValue);
 
 		if(GameManager.Instance.useFAM) {
-			StartCoroutine(UpdateCoroutine());
+			currentState.Enter();
+			coroutineFAM = StartCoroutine(UpdateCoroutine());
 		}
 	}
 
@@ -296,6 +297,17 @@ public class FAMBehaviour : MonoBehaviour
 			UpdateFAM();
 			yield return new WaitForSeconds(reactionTime);
 		}
+	}
+
+	public void StopFAM() {
+		if (coroutineFAM != null) {
+			StopCoroutine(coroutineFAM);
+		}
+	}
+
+	public void StartFAM() {
+		currentState = states[monsterBehaviour.GetCurrentState()];
+		coroutineFAM = StartCoroutine(UpdateCoroutine());
 	}
 
 	private void GetMonsterParams() {

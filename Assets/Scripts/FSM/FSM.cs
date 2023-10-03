@@ -6,11 +6,21 @@ using UnityEngine;
 public class FSM {
 
 	// Current state
-	public FSMState current;
+	private FSMState current;
+	public Dictionary<MonsterState, FSMState> states;
 
 	public FSM(FSMState state) {
+		states = new Dictionary<MonsterState, FSMState>();
 		current = state;
+		//current.Enter();
+	}
+
+	public void EnterFirstState() {
 		current.Enter();
+	}
+
+	public void SetCurrentState(MonsterState state) {
+		current = states[state];
 	}
 
 	// Examine transitions leading out from the current state

@@ -14,6 +14,8 @@ public class MonsterBehaviour : MonoBehaviour
 
 	private Animator animator;
 
+	private Coroutine coroutineFSM;
+
 	
 	DragBehaviour dragBehaviour;
 	AvoidBehaviourVolume avoidBehaviourVolume;
@@ -74,14 +76,12 @@ public class MonsterBehaviour : MonoBehaviour
 
 	
 	private MonsterState currentState;
-	private FAMBehaviour monsterFAM;
 	
     private void Awake() {
 		currentState = MonsterState.calm;
 		currentSpeed = monsterSpeed["roam"];
 		rb = GetComponent<Rigidbody>();
 		animator = GetComponent<Animator>();
-		monsterFAM = GetComponent<FAMBehaviour>();
 	}
 
 	// Start is called before the first frame update
@@ -98,11 +98,11 @@ public class MonsterBehaviour : MonoBehaviour
 
 		#region FSM setup
 
-		FSMState calmState = new FSMState("calm");
-		FSMState annoyedState = new FSMState("annoyed");
-		FSMState replenishState = new FSMState("replenish");
-		FSMState angryState = new FSMState("angry");
-		FSMState berserkState = new FSMState("berserk");
+		FSMState calmState = new FSMState(MonsterState.calm);
+		FSMState annoyedState = new FSMState(MonsterState.annoyed);
+		FSMState replenishState = new FSMState(MonsterState.replenish);
+		FSMState angryState = new FSMState(MonsterState.angry);
+		FSMState berserkState = new FSMState(MonsterState.berserk);
 
 		// Define DT transitions for each state
 		// From calm state
@@ -210,10 +210,17 @@ public class MonsterBehaviour : MonoBehaviour
 		berserkState.exitActions.Add(StopBerserk);
 
 		#endregion
+		
+		monsterFSM = new FSM(calmState);
+		monsterFSM.states.Add(MonsterState.calm, calmState);
+		monsterFSM.states.Add(MonsterState.annoyed, annoyedState);
+		monsterFSM.states.Add(MonsterState.angry, angryState);
+		monsterFSM.states.Add(MonsterState.replenish, replenishState);
+		monsterFSM.states.Add(MonsterState.berserk, berserkState);
 
 		if (!GameManager.Instance.useFAM) {
-			monsterFSM = new FSM(calmState);
-			StartCoroutine(UpdateFSM());
+			monsterFSM.EnterFirstState();
+			coroutineFSM = StartCoroutine(UpdateFSM());
 		}
 		StartCoroutine(LivePhysicalStatus());
 		StartCoroutine(LiveMentalStatus());
@@ -224,6 +231,17 @@ public class MonsterBehaviour : MonoBehaviour
 			monsterFSM.Update();
 			yield return new WaitForSeconds(reactionTime);
 		}
+	}
+
+	public void StopFSM() {
+		if (coroutineFSM != null) {
+			StopCoroutine(coroutineFSM);
+		}
+	}
+
+	public void StartFSM() {
+		monsterFSM.SetCurrentState(currentState);
+		coroutineFSM = StartCoroutine(UpdateFSM());
 	}
 
 	public IEnumerator LivePhysicalStatus() {
@@ -611,6 +629,10 @@ public class MonsterBehaviour : MonoBehaviour
 		public float GetReactionTime()
 		{
 			return reactionTime;
+		}
+
+		public MonsterState GetCurrentState() {
+			return currentState;
 		}
 
     #endregion
