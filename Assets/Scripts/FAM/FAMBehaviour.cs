@@ -71,6 +71,28 @@ public class FAMBehaviour : MonoBehaviour
 		replenish.enterActions.Add(monsterBehaviour.StartReplenishing);
 		replenish.exitActions.Add(monsterBehaviour.StopReplenishing);
 		states.Add(MonsterState.replenish, replenish);
+		GameManager.GameStateChanged += GameManagerOnGameStateChanged;
+	}
+
+	private void OnDestroy() {
+		GameManager.GameStateChanged -= GameManagerOnGameStateChanged;
+	}
+
+	private void GameManagerOnGameStateChanged(GameState state) {
+		switch ( state ) {
+			case GameState.FSM:
+				Debug.Log("Switching to FSM");
+				StopFAM();
+				monsterBehaviour.StartFSM();
+				break;
+			case GameState.FAM:
+				Debug.Log("Switching to FAM");
+				monsterBehaviour.StopFSM();
+				StartFAM();
+				break;
+			default:
+				break;
+		}
 	}
 
 	// Start is called before the first frame update
@@ -412,7 +434,7 @@ public class FAMBehaviour : MonoBehaviour
 	}
 
 	public void UpdateFAM() {
-		//Debug.Log("Updating FAM");
+		//Debug.Log("Updating FAM. Current state: " + currentState.stateName);
 		GetMonsterParams();
 		bool physicalParamsChanged;
 		bool mentalParamsChanged;

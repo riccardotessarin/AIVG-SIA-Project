@@ -46,7 +46,7 @@ public class GameManager : MonoBehaviour {
 		if ( instance == null ) {
 			//First run, set the instance
 			instance = this;
-			instance.state = GameState.Play;
+			instance.state = useFAM ? GameState.FAM : GameState.FSM;
 			
 			// DontDestroyOnLoad(gameObject);
  
@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	private void Start() {
-		UpdateGameState(instance.state);
+		//UpdateGameState(instance.state);
 		FAMToggleUI.GetComponent<Toggle>().isOn = useFAM;
 		easyModeToggleUI.GetComponent<Toggle>().isOn = easyMode;
 		gameMessagesText = gameMessagesUI.GetComponent<TextMeshProUGUI>();
@@ -67,20 +67,19 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void UpdateGameState(GameState newState) {
-		state = newState;
-
-		switch ( newState ) {
-			case GameState.Play:
-				break;
-			case GameState.Pause:
-				break;
-			case GameState.GameOver:
-				break;
-			default:
-				throw new ArgumentOutOfRangeException();
+		// If we are already in the state, do nothing
+		if (state == newState) {
+			return;
 		}
 
-		if ( GameStateChanged != null ) GameStateChanged.Invoke(newState);
+		if (!Enum.IsDefined(typeof(GameState), newState)) {
+			Debug.LogError("Invalid game state: " + newState);
+			return;
+		}
+
+		state = newState;
+
+		GameStateChanged?.Invoke(state);
 	}
 
 	public void GameOver() {
@@ -110,6 +109,11 @@ public class GameManager : MonoBehaviour {
 
 	public void SetUseFAM(bool value) {
 		useFAM = value;
+		if ( useFAM ) {
+			UpdateGameState(GameState.FAM);
+		} else {
+			UpdateGameState(GameState.FSM);
+		}
 	}
 
 	public void SetEasyMode(bool value) {
@@ -157,9 +161,8 @@ public class GameManager : MonoBehaviour {
 }
 
 public enum GameState {
-	Play,
-	Pause,
-	GameOver
+	FSM,
+	FAM
 }
 
 

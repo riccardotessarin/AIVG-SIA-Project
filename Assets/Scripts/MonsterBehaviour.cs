@@ -486,7 +486,7 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	public void Flee() {
-		//Debug.Log("Chasing");
+		//Debug.Log("Started fleeing");
 		if (freeFleeBehaviour.PlayerInRange()) {
 			//Debug.Log("Player in range");
 			currentSpeed = Mathf.Lerp(monsterSpeed["flee"], monsterSpeed["flee"]*2, freeFleeBehaviour.GetPercentage());
