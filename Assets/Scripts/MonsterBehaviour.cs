@@ -274,6 +274,9 @@ public class MonsterBehaviour : MonoBehaviour
 			animator.SetBool("isRunning", false);
 		}
 
+		string logText = currentState + "\n" + health + "\n" + hunger + "\n" + sleepiness + "\n" + stress + "\n" + grudge;
+
+		GameManager.Instance.SetNPCLoggingText(logText);
 
 		if (Input.GetKeyDown(KeyCode.Return)) {
 			Debug.Log("Current stats: " + health + " " + hunger + " " + sleepiness + " " + stress + " " + grudge);

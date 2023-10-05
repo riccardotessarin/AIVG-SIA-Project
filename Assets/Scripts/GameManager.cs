@@ -39,6 +39,10 @@ public class GameManager : MonoBehaviour {
 	public GameObject easyModeToggleUI;
 	public GameObject gameMessagesUI;
 	private TextMeshProUGUI gameMessagesText;
+	private Coroutine messageCoroutine;
+    private bool logNPC;
+	//public GameObject NPCLoggingToggleUI;
+	public TextMeshProUGUI NPCLoggingUI;
 
 
 	private void Awake() {
@@ -120,6 +124,13 @@ public class GameManager : MonoBehaviour {
 		easyMode = value;
 	}
 
+	public void SetNPCLogging(bool value) {
+		logNPC = value;
+	}
+
+	public void SetNPCLoggingText(string text) {
+		NPCLoggingUI.text = text;
+	}
 
 	public void Pause() {
 		if( !GameIsPaused ) {
@@ -141,8 +152,7 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
-	private Coroutine messageCoroutine;
-	public void SetGameMessage(string message) {
+    public void SetGameMessage(string message) {
 		if ( messageCoroutine != null ) {
 			StopCoroutine(messageCoroutine);
 		}
