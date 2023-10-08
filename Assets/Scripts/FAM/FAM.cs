@@ -128,7 +128,7 @@ public class FuzzyConclusion
 	public FuzzyClass SetClass { get; set; }
 }
 
-public class FuzzyInferenceSystem
+public class FAM
 {
 	public FuzzyRule[] Rules { get; set; }
 	public List<FuzzyVariable> Inputs { get; set; }

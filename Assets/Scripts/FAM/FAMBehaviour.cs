@@ -26,8 +26,8 @@ public class FAMBehaviour : MonoBehaviour
 	FuzzyVariable mentalstatus;
 	FuzzyRule[] physicalRules;
 	FuzzyRule[] mentalRules;
-	FuzzyInferenceSystem physicalFIS;
-	FuzzyInferenceSystem mentalFIS;
+	FAM physicalFAM;
+	FAM mentalFAM;
 	private bool useDefuzzyMean = true;
 	float lowThreshold = 0.3f;
 	float highThreshold = 0.7f;
@@ -263,7 +263,7 @@ public class FAMBehaviour : MonoBehaviour
 		};
 
 		// Create the fuzzy inference system
-		physicalFIS = new FuzzyInferenceSystem
+		physicalFAM = new FAM
 		{
 			Rules = physicalRules,
 			Inputs = new List<FuzzyVariable> { healthFuzzy, hungerFuzzy, sleepinessFuzzy },
@@ -271,7 +271,7 @@ public class FAMBehaviour : MonoBehaviour
 		};
 
 		// Create the fuzzy inference system
-		mentalFIS = new FuzzyInferenceSystem
+		mentalFAM = new FAM
 		{
 			Rules = mentalRules,
 			Inputs = new List<FuzzyVariable> { stressFuzzy, grudgeFuzzy },
@@ -279,8 +279,8 @@ public class FAMBehaviour : MonoBehaviour
 		};
 
 		// Perform the fuzzy inference
-		physicalFIS.Calculate();
-		mentalFIS.Calculate();
+		physicalFAM.Calculate();
+		mentalFAM.Calculate();
 
 		Debug.Log("Mental status: " + mentalstatus.MembershipValues[FuzzyClass.low] + ", " + mentalstatus.MembershipValues[FuzzyClass.medium] + ", " + mentalstatus.MembershipValues[FuzzyClass.high]);
 		Debug.Log("Physical status: " + physicalstatus.MembershipValues[FuzzyClass.low] + ", " + physicalstatus.MembershipValues[FuzzyClass.medium] + ", " + physicalstatus.MembershipValues[FuzzyClass.high]);
@@ -448,8 +448,8 @@ public class FAMBehaviour : MonoBehaviour
 			//Debug.Log("Physical fuzzy variables changed");
 			//physicalFIS.Inputs = physicalParamsChanged;
 			//physicalFIS.UpdateFuzzyVariables();
-			physicalFIS.Calculate();
-			physicalstatus = physicalFIS.GetSingleOutput();
+			physicalFAM.Calculate();
+			physicalstatus = physicalFAM.GetSingleOutput();
 			physicalStatusValue = useDefuzzyMean ? fuzzify.DefuzzifyMean(physicalstatus) : fuzzify.DefuzzifyMax(physicalstatus);
 			Debug.Log("Defuzzy physical status value: " + physicalStatusValue);
 		}
@@ -457,8 +457,8 @@ public class FAMBehaviour : MonoBehaviour
 			//Debug.Log("Mental fuzzy variables changed");
 			//mentalFIS.Inputs = mentalParamsChanged;
 			//mentalFIS.UpdateFuzzyVariables();
-			mentalFIS.Calculate();
-			mentalstatus = mentalFIS.GetSingleOutput();
+			mentalFAM.Calculate();
+			mentalstatus = mentalFAM.GetSingleOutput();
 			mentalStatusValue = useDefuzzyMean ? fuzzify.DefuzzifyMean(mentalstatus) : fuzzify.DefuzzifyMax(mentalstatus);
 			Debug.Log("Defuzzy mental status value: " + mentalStatusValue);
 		}

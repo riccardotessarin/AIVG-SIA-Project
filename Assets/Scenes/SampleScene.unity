@@ -1962,7 +1962,7 @@ MonoBehaviour:
   brakeAt: 1
   stopAt: 0.01
   fleeRange: 5
-  useFAM: 0
+  useFAM: 1
   FAMToggleUI: {fileID: 171265043}
   easyMode: 1
   easyModeToggleUI: {fileID: 1760768856}
