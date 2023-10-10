@@ -83,8 +83,8 @@ public class FuzzyRule
 public class FuzzyCondition
 {
 	public FuzzyVariable Variable { get; set; }
-	public FuzzyClass SetClass { get; set; }	// This will become a list to evaluate and/or conditions
-	public FuzzyClass[] SetClasses { get; set; }
+	public FuzzyClass SetClass { get; set; }
+	public FuzzyClass[] SetClasses { get; set; } // Used for fuzzy OR
 
 	public bool Evaluate()
 	{
@@ -161,25 +161,6 @@ public class FAM
 			Outputs[i] = trueRules.Where(rule => rule.Conclusion.Variable == Outputs[i]).Select(rule => rule.Conclusion.Variable).FirstOrDefault();
 		}
 	}
-
-	/*
-	public void UpdateFuzzyVariables()
-	{
-		foreach (FuzzyVariable input in Inputs)
-		{
-			foreach (FuzzyRule rule in Rules)
-			{
-				foreach (FuzzyCondition condition in rule.Conditions)
-				{
-					if (condition.Variable.Name == input.Name)
-					{
-						condition.Variable = input;
-					}
-				}
-			}
-		}
-	}
-	*/
 
 	public FuzzyVariable GetSingleOutput()
 	{

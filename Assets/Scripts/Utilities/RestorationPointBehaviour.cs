@@ -4,30 +4,41 @@ using UnityEngine;
 
 public class RestorationPointBehaviour : MonoBehaviour
 {
-
-	/// <summary>
-	/// OnTriggerStay is called once per frame for every Collider other
-	/// that is touching the trigger.
-	/// </summary>
-	/// <param name="other">The other Collider involved in this collision.</param>
-	void OnTriggerStay(Collider other)
-	{
-		GameObject monster = other.gameObject;
-		if (monster.tag == "Monster")
-		{
-			monster.GetComponent<MonsterBehaviour>().Replenish();
-		}
-	}
+	private GameObject NPC;
+	public float targetRange = 5.0f;
+	private bool replenished = false;
 
 	// Start is called before the first frame update
 	void Start()
 	{
-		
+		NPC = GameObject.FindWithTag("NPC");
+		StartCoroutine(DistanceCoroutine());
+	}
+
+	private IEnumerator DistanceCoroutine() {
+		while (true) {
+			yield return new WaitForSeconds(1.0f);
+			bool inRange = Vector3.Distance(transform.position, NPC.transform.position) <= targetRange;
+			if (inRange)
+			{
+				transform.parent.GetComponent<Renderer>().material.color = Color.green;
+				if (!replenished)
+				{
+					replenished = true;
+					NPC.GetComponent<MonsterBehaviour>().Replenish();
+				}
+			}
+			else
+			{
+				replenished = false;
+				transform.parent.GetComponent<Renderer>().material.color = Color.red;
+			}
+		}
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
-		
+
 	}
 }

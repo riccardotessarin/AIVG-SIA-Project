@@ -76,6 +76,7 @@ public class Fuzzify
 		return membershipValue;
 	}
 
+	// For debugging purposes, only prints the membership values to the console
 	public void ShowFuzzify(float crispValue)
 	{
 		foreach (var membershipFunction in MembershipFunctions)

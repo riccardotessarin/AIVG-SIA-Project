@@ -9,7 +9,6 @@ public class FAMState {
 	public MonsterState stateName;
 
 	// Arrays of actions to perform based on transitions fire (or not)
-	// Getters and setters are preferable, but we want to keep the source clean
 	public List<FAMAction> enterActions = new List<FAMAction> ();
 	public List<FAMAction> stayActions = new List<FAMAction> ();
 	public List<FAMAction> exitActions = new List<FAMAction> ();
