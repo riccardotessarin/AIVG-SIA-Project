@@ -39,7 +39,7 @@ public class DartBehaviour : MonoBehaviour
 		MonsterBehaviour monster = collision.gameObject.GetComponent<MonsterBehaviour>();
 		float dartDamage = 5f;
 		float stressDamage = 10f;
-		float grudgeDamage = 4f;
+		float grudgeDamage = 5f;
 		if (monster != null) {
 			Debug.Log(monster + " hitted");
 			

@@ -78,15 +78,25 @@ public class MonsterBehaviour : MonoBehaviour
 	private MonsterState currentState;
 	
     private void Awake() {
+		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+		stopwatch.Start();
+
 		currentState = MonsterState.calm;
 		currentSpeed = monsterSpeed["roam"];
 		rb = GetComponent<Rigidbody>();
 		animator = GetComponent<Animator>();
+
+		stopwatch.Stop();
+		Debug.Log ("FSM awake time taken: "+(stopwatch.Elapsed.TotalMilliseconds));
+		stopwatch.Reset();
 	}
 
 	// Start is called before the first frame update
 	void Start()
 	{
+		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+		stopwatch.Start();
+
 		status = new MovementStatus ();
 		dragBehaviour = GetComponent<DragBehaviour>();
 		avoidBehaviourVolume = GetComponent<AvoidBehaviourVolume>();
@@ -224,6 +234,10 @@ public class MonsterBehaviour : MonoBehaviour
 		}
 		StartCoroutine(LivePhysicalStatus());
 		StartCoroutine(LiveMentalStatus());
+
+		stopwatch.Stop();
+		Debug.Log ("FSM start time taken: "+(stopwatch.Elapsed.TotalMilliseconds));
+		stopwatch.Reset();
 	}
 
 	public IEnumerator UpdateFSM() {
@@ -244,22 +258,20 @@ public class MonsterBehaviour : MonoBehaviour
 		coroutineFSM = StartCoroutine(UpdateFSM());
 	}
 
+	float deltaK = 30f;
+
 	public IEnumerator LivePhysicalStatus() {
 		while (true) {
-			if (hunger < 100f) {
-				hunger += 0.5f;
-			}
-			if (sleepiness < 100f) {
-				sleepiness += 0.5f;
-			}
+			hunger = hunger + deltaK > 100f ? 100f : hunger + deltaK;
+			sleepiness = sleepiness + deltaK > 100f ? 100f : sleepiness + deltaK;
 			yield return new WaitForSeconds(1f);
 		}
 	}
 
 	public IEnumerator LiveMentalStatus() {
 		while (true) {
-			stress = stress - 1.0f > 0f ? stress - 1.0f : 0f;
-			grudge = grudge - 0.1f > 0f ? grudge - 0.1f : 0f;
+			stress = stress - deltaK > 0f ? stress - deltaK : 0f;
+			grudge = grudge - deltaK > 0f ? grudge - deltaK : 0f;
 			yield return new WaitForSeconds(1f);
 		}
 	}
@@ -281,7 +293,9 @@ public class MonsterBehaviour : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.Return)) {
 			Debug.Log("Current stats: " + health + " " + hunger + " " + sleepiness + " " + stress + " " + grudge);
 		}
-		
+
+/*
+
 		if (Input.GetKeyDown(KeyCode.Space)) {
 			health = 100f;
 			hunger = 0f;
@@ -302,6 +316,7 @@ public class MonsterBehaviour : MonoBehaviour
 			Debug.Log("Grudge: " + grudge);
 		}
 
+*/
 	}
 	
 	
@@ -500,7 +515,7 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	public void IncreaseGrudge() {
-		grudge = grudge + reactionTime > 100f ? 100f : grudge + reactionTime;
+		grudge = grudge + 0f > 100f ? 100f : grudge + 0f;
 	}
 
 	public void StopFleeing() {
@@ -522,8 +537,10 @@ public class MonsterBehaviour : MonoBehaviour
 			Attack();
 			// Decrease stress by 20% and grudge by 10%
 			// FSM will take care of the transition to the calm state
-			stress *= 0.8f;
-			grudge *= 0.9f;
+			//stress *= 0.8f;
+			//grudge *= 0.9f;
+			stress -= 10f;
+			grudge -= 5f;
 		}
 	}
 
@@ -547,8 +564,10 @@ public class MonsterBehaviour : MonoBehaviour
 			Attack();
 			// Decrease stress by 10% and grudge by 5%
 			// FSM will take care to transition back to the replenish state
-			stress *= 0.9f;
-			grudge *= 0.95f;
+			//stress *= 0.9f;
+			//grudge *= 0.95f;
+			stress -= 5f;
+			grudge -= 2.5f;
 		}
 	}
 
@@ -595,9 +614,11 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void TakeDamage(float damage, float stressDamage, float grudgeDamage) {
 		// Only for demo purposes, the monster can't die
-		health = health - damage < 0f ? 0f : health - damage;
-		stressDamage *= rageMultiplier[currentState];
-		grudgeDamage *= rageMultiplier[currentState];
+		if (currentState != MonsterState.replenish) {
+			health = health - damage < 0f ? 0f : health - damage;
+		}
+		//stressDamage *= rageMultiplier[currentState];
+		//grudgeDamage *= rageMultiplier[currentState];
 		stress = stress + stressDamage > 100f ? 100f : stress + stressDamage;
 		grudge = grudge + grudgeDamage > 100f ? 100f : grudge + grudgeDamage;
 		Debug.Log("Easy Mode: " + GameManager.Instance.easyMode);

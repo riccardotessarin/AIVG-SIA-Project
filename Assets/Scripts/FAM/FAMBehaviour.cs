@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using System.IO;
 
 public class FAMBehaviour : MonoBehaviour
 {
@@ -29,15 +30,24 @@ public class FAMBehaviour : MonoBehaviour
 	private FAM physicalFAM;
 	private FAM mentalFAM;
 	private bool useDefuzzyMean = true;
-	private float lowThreshold = 0.3f;
-	private float highThreshold = 0.7f;
+	private float lowThreshold = 0.33f;
+	private float highThreshold = 0.66f;
 	private float reactionTime;
+
+	private string path = "Assets/Scripts/FAM/parameters30update.txt";
+
+	private StreamWriter writer;
 
 	/// <summary>
 	/// Awake is called when the script instance is being loaded.
 	/// </summary>
 	void Awake()
 	{
+
+		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+		stopwatch.Start();
+
+		writer = new StreamWriter(path, true);
 		fuzzify = new Fuzzify();
 		fuzzify.AddMembershipFunction(FuzzyClass.low, new float[] { 0f, 0f, 20f, 40f });
 		fuzzify.AddMembershipFunction(FuzzyClass.medium, new float[] { 20f, 40f, 60f, 80f });
@@ -72,9 +82,15 @@ public class FAMBehaviour : MonoBehaviour
 		replenish.exitActions.Add(monsterBehaviour.StopReplenishing);
 		states.Add(MonsterState.replenish, replenish);
 		GameManager.GameStateChanged += GameManagerOnGameStateChanged;
+
+
+		stopwatch.Stop();
+		Debug.Log ("FAM awake time taken: "+(stopwatch.Elapsed.TotalMilliseconds));
+		stopwatch.Reset();
 	}
 
 	private void OnDestroy() {
+		writer.Close();
 		GameManager.GameStateChanged -= GameManagerOnGameStateChanged;
 	}
 
@@ -98,6 +114,10 @@ public class FAMBehaviour : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
 	{
+
+		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+		stopwatch.Start();
+
 		healthFuzzy = fuzzify.ToFuzzy("health", crispHealth);
 		//Debug.Log("Health fuzzy: " + healthFuzzy.MembershipValues[FuzzyClass.low] + ", " + healthFuzzy.MembershipValues[FuzzyClass.medium] + ", " + healthFuzzy.MembershipValues[FuzzyClass.high]);
 		hungerFuzzy = fuzzify.ToFuzzy("hunger", crispHunger);
@@ -300,6 +320,10 @@ public class FAMBehaviour : MonoBehaviour
 			currentState.Enter();
 			coroutineFAM = StartCoroutine(UpdateCoroutine());
 		}
+
+		stopwatch.Stop();
+		Debug.Log ("FAM start time taken: "+(stopwatch.Elapsed.TotalMilliseconds));
+		stopwatch.Reset();
 	}
 
 	public IEnumerator UpdateCoroutine() {
@@ -380,10 +404,19 @@ public class FAMBehaviour : MonoBehaviour
 		}
 	}
 
+	string PSval = "high";
+	string MSval = "high";
+
+	float time = 0f;
+
 	// Update is called once per frame
 	void Update()
 	{
-		
+		time += Time.deltaTime;
+		if (time >= reactionTime) {
+			writer.WriteLine(crispHealth + " " + crispHunger + " " + crispSleepiness + " " + crispStress + " " + crispGrudge + " " + PSval + " " + MSval + " " + currentState.stateName);
+			time = 0f;
+		}
 	}
 
 	public void UpdateFAM() {
@@ -392,31 +425,68 @@ public class FAMBehaviour : MonoBehaviour
 		bool physicalParamsChanged;
 		bool mentalParamsChanged;
 
+		String changes = "";
+
+		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+		stopwatch.Start();
+
 		ParamsToFuzzy(out physicalParamsChanged, out mentalParamsChanged);
 		if (!physicalParamsChanged && !mentalParamsChanged) {
 			//Debug.Log("No fuzzy variables changed");
+
+			stopwatch.Stop();
+			Debug.Log ("FAM time taken: "+(stopwatch.Elapsed.TotalMilliseconds) + " (no change)");
+			//writer.WriteLine(stopwatch.Elapsed.TotalMilliseconds + " (no change)");
+			stopwatch.Reset();
+
 			return;
 		}
 		if (physicalParamsChanged) {
 			//Debug.Log("Physical fuzzy variables changed");
+			changes += "+ PS +";
 			physicalFAM.Calculate();
 			physicalstatus = physicalFAM.GetSingleOutput();
 			physicalStatusValue = useDefuzzyMean ? fuzzify.DefuzzifyMean(physicalstatus) : fuzzify.DefuzzifyMax(physicalstatus);
-			Debug.Log("Defuzzy physical status value: " + physicalStatusValue);
+			//Debug.Log("Defuzzy physical status value: " + physicalStatusValue);
 		}
 		if (mentalParamsChanged) {
 			//Debug.Log("Mental fuzzy variables changed");
+			changes += "+ MS +";
 			mentalFAM.Calculate();
 			mentalstatus = mentalFAM.GetSingleOutput();
 			mentalStatusValue = useDefuzzyMean ? fuzzify.DefuzzifyMean(mentalstatus) : fuzzify.DefuzzifyMax(mentalstatus);
-			Debug.Log("Defuzzy mental status value: " + mentalStatusValue);
+			//Debug.Log("Defuzzy mental status value: " + mentalStatusValue);
 		}
 		if (UpdateState() is FAMState transition && currentState != transition) {
-			Debug.Log("State changed from " + currentState.stateName + " to " + transition.stateName);
+			changes += "+ SC +";
+			//Debug.Log("State changed from " + currentState.stateName + " to " + transition.stateName);
+			GameManager.Instance.SetGameMessage("State changed from " + currentState.stateName + " to " + transition.stateName);
 			currentState.Exit(); // Exit old state
 			currentState = transition;
 			currentState.Enter(); // Enter new state
 		}
+
+		stopwatch.Stop();
+		Debug.Log ("FAM time taken: "+(stopwatch.Elapsed.TotalMilliseconds) + " " + changes);
+		//writer.WriteLine(stopwatch.Elapsed.TotalMilliseconds + " " + changes);
+		stopwatch.Reset();
+
+		
+		if (physicalStatusValue < lowThreshold) {
+			PSval = "low";
+		} else if (physicalStatusValue >= lowThreshold && physicalStatusValue < highThreshold) {
+			PSval = "medium";
+		} else {
+			PSval = "high";
+		}
+
+		if (mentalStatusValue < lowThreshold) {
+			MSval = "low";
+		} else if (mentalStatusValue >= lowThreshold && mentalStatusValue < highThreshold) {
+			MSval = "medium";
+		} else {
+			MSval = "high";
+		}		
 		currentState.Stay(); // Stay in current state
 	}
 }

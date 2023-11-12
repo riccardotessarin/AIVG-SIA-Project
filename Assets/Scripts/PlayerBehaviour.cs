@@ -39,7 +39,7 @@ public class PlayerBehaviour : MonoBehaviour {
 		rock = Resources.Load("Prefabs/stone-oval") as GameObject;
 		dart = Resources.Load("Prefabs/dart") as GameObject;
 		axe = Resources.Load("Prefabs/axe") as GameObject;
-		currentDevice = rock;
+		currentDevice = dart;
 	}
 
 	// Update is called once per frame
