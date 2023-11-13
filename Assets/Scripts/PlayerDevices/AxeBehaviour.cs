@@ -37,6 +37,7 @@ public class AxeBehaviour : MonoBehaviour
 	}
 
 	private void OnCollisionEnter(Collision collision) {
+		Debug.Log("Collision detected");
 		MonsterBehaviour monster = collision.gameObject.GetComponent<MonsterBehaviour>();
 		float axeDamage = 10f;
 		float stressDamage = 20f;
