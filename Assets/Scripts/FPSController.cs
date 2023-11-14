@@ -16,12 +16,12 @@ public class FPSController : MonoBehaviour
 	public float lookXLimit = 45f;
 	private float mouseX = 0.0f;
 	private float mouseY = 0.0f;
-	private float distanceZ = 2.0f;
+	private float distanceZ = 0.9f;
  
 	Vector3 moveDirection = Vector3.zero;
  
 	public bool canMove = true;
-	private bool isFPS = false;
+	private bool isFPS;
 	
 	CharacterController characterController;
 
@@ -62,10 +62,20 @@ public class FPSController : MonoBehaviour
 		target = transform.GetChild(2);
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
+		isFPS = distanceZ < 1.0f;
 	}
 
 	void Update()
 	{
+		distanceZ += Input.GetAxis("Mouse ScrollWheel");
+		distanceZ = Mathf.Clamp(distanceZ, 0.9f, 8.0f);
+		if (distanceZ < 1.0f) {
+			mouseX = 0f;
+			playerCamera.transform.localPosition = new Vector3(0f, 1.7f, 0f);
+			isFPS = true;
+		} else {
+			isFPS = false;
+		}
  
 		#region Handles Movment
 		Vector3 forward = transform.TransformDirection(Vector3.forward);
