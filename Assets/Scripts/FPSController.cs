@@ -5,27 +5,28 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class FPSController : MonoBehaviour
 {
+	private Animator animator;
 	public Camera playerCamera;
-	public float walkSpeed = 6f;
-	public float runSpeed = 12f;
-	public float jumpPower = 7f;
-	public float gravity = 10f;
+	private float walkSpeed = 2f;
+	private float runSpeed = 6f;
+	private float jumpPower = 7f;
+	private float gravity = 10f;
  
  
-	public float lookSpeed = 2f;
-	public float lookXLimit = 45f;
+	private float lookSpeed = 2f;
+	private float lookXLimit = 45f;
 	private float mouseX = 0.0f;
 	private float mouseY = 0.0f;
 	private float distanceZ = 0.9f;
  
-	Vector3 moveDirection = Vector3.zero;
+	private Vector3 moveDirection = Vector3.zero;
  
-	public bool canMove = true;
+	private bool canMove = true;
 	private bool isFPS;
 	
-	CharacterController characterController;
+	private CharacterController characterController;
 
-	public Transform target;  // The GameObject to rotate around
+	private Transform target;  // The GameObject to rotate around
 
 	/// <summary>
 	/// Awake is called when the script instance is being loaded.
@@ -33,6 +34,7 @@ public class FPSController : MonoBehaviour
 	void Awake()
 	{
 		GameManager.GameStateChanged += GameManagerOnGameStateChanged;
+		animator = GetComponent<Animator>();
 	}
 
 	private void OnDestroy() {
@@ -71,7 +73,7 @@ public class FPSController : MonoBehaviour
 		distanceZ = Mathf.Clamp(distanceZ, 0.9f, 8.0f);
 		if (distanceZ < 1.0f) {
 			mouseX = 0f;
-			playerCamera.transform.localPosition = new Vector3(0f, 1.7f, 0f);
+			playerCamera.transform.localPosition = new Vector3(0f, 1.7f, 0.1f);
 			isFPS = true;
 		} else {
 			isFPS = false;
@@ -88,6 +90,18 @@ public class FPSController : MonoBehaviour
 		float movementDirectionY = moveDirection.y;
 		moveDirection = (forward * curSpeedX) + (right * curSpeedY);
  
+		if (Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0) {
+			animator.SetBool("isWalking", true);
+			if (isRunning) {
+				animator.SetBool("isRunning", true);
+			} else {
+				animator.SetBool("isRunning", false);
+			}
+		} else {
+			animator.SetBool("isWalking", false);
+			animator.SetBool("isRunning", false);
+		}
+
 		#endregion
  
 		#region Handles Jumping
@@ -126,10 +140,11 @@ public class FPSController : MonoBehaviour
 
 				if (Mathf.Abs(verticalInput) > 0.01f)
 				{
-					playerCamera.transform.parent = null;
+					playerCamera.transform.SetParent(null);
 					// Align the player's rotation with the camera's rotation
 					transform.rotation = Quaternion.Euler(0, playerCamera.transform.eulerAngles.y, 0);
-					playerCamera.transform.parent = transform;
+					playerCamera.transform.SetParent(transform, true);
+					playerCamera.transform.localScale = Vector3.one;
 				}
 
 				Vector3 direction = new Vector3(0, 0, -distanceZ); // Adjust the distance from the target if needed

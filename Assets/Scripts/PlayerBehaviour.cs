@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour {
 	private float maxHealth = 100.0f;
-	public float health;
+	private float health;
 	public ScreenFlash screenFlash;
 	public HealthBar healthBar;
 	private Transform headTransform;
+	private Transform playerCamera;
 	private GameObject currentDevice;
 	private GameObject rock;
 	private GameObject dart;
@@ -30,6 +31,7 @@ public class PlayerBehaviour : MonoBehaviour {
 	{
 		health = maxHealth;
 		headTransform = transform.GetChild(2);
+		playerCamera = transform.GetChild(3);
 		healthBar.SetMaxHealth(maxHealth);
 	}
 
@@ -58,7 +60,9 @@ public class PlayerBehaviour : MonoBehaviour {
 			currentDevice = axe;
 		}
 		if (Input.GetKeyDown(KeyCode.T)) {
-			Instantiate(currentDevice, headTransform.position + (Vector3.down + transform.forward) * 0.5f, headTransform.rotation);
+			Quaternion applyRotation = headTransform.rotation;
+			applyRotation.x = playerCamera.transform.localRotation.x;
+			Instantiate(currentDevice, headTransform.position + (Vector3.down + transform.forward) * 0.5f, applyRotation);
 		}
 	}
 }
