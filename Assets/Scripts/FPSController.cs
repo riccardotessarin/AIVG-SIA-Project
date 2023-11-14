@@ -14,17 +14,47 @@ public class FPSController : MonoBehaviour
  
 	public float lookSpeed = 2f;
 	public float lookXLimit = 45f;
- 
+	private float mouseX = 0.0f;
+	private float mouseY = 0.0f;
+	private float distanceZ = 2.0f;
  
 	Vector3 moveDirection = Vector3.zero;
-	float rotationX = 0;
  
 	public bool canMove = true;
- 
+	private bool isFPS = false;
 	
 	CharacterController characterController;
 
 	public Transform target;  // The GameObject to rotate around
+
+	/// <summary>
+	/// Awake is called when the script instance is being loaded.
+	/// </summary>
+	void Awake()
+	{
+		GameManager.GameStateChanged += GameManagerOnGameStateChanged;
+	}
+
+	private void OnDestroy() {
+		GameManager.GameStateChanged -= GameManagerOnGameStateChanged;
+	}
+
+	private void GameManagerOnGameStateChanged(GameState state) {
+		switch ( state ) {
+			case GameState.Pause:
+				Debug.Log("Game Pause");
+				canMove = false;
+				Cursor.lockState = CursorLockMode.None;
+				Cursor.visible = true;
+				break;
+			default:
+				Debug.Log("Game Play");
+				canMove = true;
+				Cursor.lockState = CursorLockMode.Locked;
+				Cursor.visible = false;
+				break;
+		}
+	}
 
 	void Start()
 	{
@@ -33,9 +63,6 @@ public class FPSController : MonoBehaviour
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
 	}
- 
- 	float mouseX = 0.0f;
-	float mouseY = 0.0f;
 
 	void Update()
 	{
@@ -70,8 +97,9 @@ public class FPSController : MonoBehaviour
  
 		#endregion
  
-		#region Handles Rotation
 		characterController.Move(moveDirection * Time.deltaTime);
+
+		#region Handles Rotation
  
 		if (canMove)
 		{
@@ -79,12 +107,7 @@ public class FPSController : MonoBehaviour
 			mouseY -= Input.GetAxis("Mouse Y") * lookSpeed;
 			mouseY = Mathf.Clamp(mouseY, -lookXLimit, lookXLimit);
 
-			if (false) {
-				//rotationX -= Input.GetAxis("Mouse Y") * lookSpeed;
-				//rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
-				//playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
-				//transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
-
+			if (isFPS) {
 				playerCamera.transform.localRotation = Quaternion.Euler(mouseY, 0, 0);
 				transform.rotation *= Quaternion.Euler(0, mouseX, 0);
 			} else {
@@ -93,26 +116,17 @@ public class FPSController : MonoBehaviour
 
 				if (Mathf.Abs(verticalInput) > 0.01f)
 				{
-					// Align the player's rotation with the camera's rotation
-					//transform.rotation *= Quaternion.Euler(0, playerCamera.transform.localRotation.y * lookSpeed, 0);
-					//playerCamera.transform.localRotation *= Quaternion.Euler (0.0f, -transform.rotation.y * lookSpeed, 0.0f);
-
 					playerCamera.transform.parent = null;
 					// Align the player's rotation with the camera's rotation
 					transform.rotation = Quaternion.Euler(0, playerCamera.transform.eulerAngles.y, 0);
 					playerCamera.transform.parent = transform;
-
 				}
 
-				// Rotate the camera around the target based on mouse input
+				Vector3 direction = new Vector3(0, 0, -distanceZ); // Adjust the distance from the target if needed
+				Quaternion rotation = Quaternion.Euler(mouseY, mouseX, 0);
+				playerCamera.transform.position = target.position + rotation * direction;
 				playerCamera.transform.LookAt(target.position);
-				playerCamera.transform.RotateAround(target.position, Vector3.up, mouseX);
-				playerCamera.transform.RotateAround(target.position, playerCamera.transform.right, mouseY);
-
-				mouseX = 0f;
-				mouseY = 0f;
 			}
-			
 		}
  
 		#endregion

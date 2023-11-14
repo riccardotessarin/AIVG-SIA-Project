@@ -2157,6 +2157,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pauseMenuUI: {fileID: 834741953}
+  structure: 0
   state: 0
   gameOverUI: {fileID: 1323529163}
   sightRange: 2
@@ -13556,6 +13557,10 @@ PrefabInstance:
       propertyPath: playerCamera
       value: 
       objectReference: {fileID: 88949987}
+    - target: {fileID: 1277484416, guid: 481b4ef1aea5b254b8476b5129549fe2, type: 3}
+      propertyPath: m_Height
+      value: 1.9
+      objectReference: {fileID: 0}
     - target: {fileID: 1277484417, guid: 481b4ef1aea5b254b8476b5129549fe2, type: 3}
       propertyPath: healthBar
       value: 
@@ -13567,6 +13572,10 @@ PrefabInstance:
     - target: {fileID: 1727941279, guid: 481b4ef1aea5b254b8476b5129549fe2, type: 3}
       propertyPath: m_LocalPosition.y
       value: 1.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 225752573604238251, guid: 481b4ef1aea5b254b8476b5129549fe2, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1496335964157040593, guid: 481b4ef1aea5b254b8476b5129549fe2, type: 3}
       propertyPath: m_RootOrder
@@ -13616,7 +13625,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: man-viking_Rig
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 225752573604238251, guid: 481b4ef1aea5b254b8476b5129549fe2, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 481b4ef1aea5b254b8476b5129549fe2, type: 3}
 --- !u!1 &1301817113
 GameObject:

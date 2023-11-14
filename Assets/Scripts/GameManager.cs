@@ -17,9 +17,11 @@ public class GameManager : MonoBehaviour {
 	public static bool GameIsPaused = false;
 	public GameObject pauseMenuUI;
 
+	public GameStructure structure;
 	public GameState state;
 	bool gameHasEnded = false;
 	public GameObject gameOverUI;
+	public static event Action<GameStructure> GameStructureChanged;
 	public static event Action<GameState> GameStateChanged;
 
 	public float sightRange = 2f;
@@ -50,7 +52,8 @@ public class GameManager : MonoBehaviour {
 		if ( instance == null ) {
 			//First run, set the instance
 			instance = this;
-			instance.state = useFAM ? GameState.FAM : GameState.FSM;
+			instance.structure = useFAM ? GameStructure.FAM : GameStructure.FSM;
+			instance.state = GameState.Play;
 			
 			// DontDestroyOnLoad(gameObject);
  
@@ -68,6 +71,22 @@ public class GameManager : MonoBehaviour {
 		if ( Input.GetKeyDown(KeyCode.Escape) ) {
 			Pause();
 		}
+	}
+
+	public void UpdateGameStructure(GameStructure newStructure) {
+		// If we are already in the state, do nothing
+		if (structure == newStructure) {
+			return;
+		}
+
+		if (!Enum.IsDefined(typeof(GameStructure), newStructure)) {
+			Debug.LogError("Invalid game state: " + newStructure);
+			return;
+		}
+
+		structure = newStructure;
+
+		GameStructureChanged?.Invoke(structure);
 	}
 
 	public void UpdateGameState(GameState newState) {
@@ -114,9 +133,9 @@ public class GameManager : MonoBehaviour {
 	public void SetUseFAM(bool value) {
 		useFAM = value;
 		if ( useFAM ) {
-			UpdateGameState(GameState.FAM);
+			UpdateGameStructure(GameStructure.FAM);
 		} else {
-			UpdateGameState(GameState.FSM);
+			UpdateGameStructure(GameStructure.FSM);
 		}
 	}
 
@@ -134,6 +153,7 @@ public class GameManager : MonoBehaviour {
 
 	public void Pause() {
 		if( !GameIsPaused ) {
+			UpdateGameState(GameState.Pause);
 			RPGInputManager.DisableInputActions();
 			pauseMenuUI.SetActive(true);
 			Time.timeScale = 0f;
@@ -144,6 +164,7 @@ public class GameManager : MonoBehaviour {
 
 	public void Resume() {
 		if ( GameIsPaused ) {
+			UpdateGameState(GameState.Play);
 			pauseMenuUI.SetActive(false);
 			RPGInputManager.EnableInputActions();
 			Time.timeScale = 1f;
@@ -170,9 +191,14 @@ public class GameManager : MonoBehaviour {
 	}
 }
 
-public enum GameState {
+public enum GameStructure {
 	FSM,
 	FAM
+}
+
+public enum GameState {
+	Play,
+	Pause
 }
 
 

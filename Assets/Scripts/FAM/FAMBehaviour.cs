@@ -71,21 +71,21 @@ public class FAMBehaviour : MonoBehaviour
 		replenish.enterActions.Add(monsterBehaviour.StartReplenishing);
 		replenish.exitActions.Add(monsterBehaviour.StopReplenishing);
 		states.Add(MonsterState.replenish, replenish);
-		GameManager.GameStateChanged += GameManagerOnGameStateChanged;
+		GameManager.GameStructureChanged += GameManagerOnGameStructureChanged;
 	}
 
 	private void OnDestroy() {
-		GameManager.GameStateChanged -= GameManagerOnGameStateChanged;
+		GameManager.GameStructureChanged -= GameManagerOnGameStructureChanged;
 	}
 
-	private void GameManagerOnGameStateChanged(GameState state) {
-		switch ( state ) {
-			case GameState.FSM:
+	private void GameManagerOnGameStructureChanged(GameStructure structure) {
+		switch ( structure ) {
+			case GameStructure.FSM:
 				Debug.Log("Switching to FSM");
 				StopFAM();
 				monsterBehaviour.StartFSM();
 				break;
-			case GameState.FAM:
+			case GameStructure.FAM:
 				Debug.Log("Switching to FAM");
 				monsterBehaviour.StopFSM();
 				StartFAM();
