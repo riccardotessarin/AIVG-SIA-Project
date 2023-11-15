@@ -14,6 +14,8 @@ public class PlayerBehaviour : MonoBehaviour {
 	private GameObject dart;
 	private GameObject axe;
 
+	private Animator animator;
+
 	public void TakeDamage(float damage) {
 		health = health - damage > 0 ? health - damage : 0;
 		screenFlash.StartFlash(0.2f, 0.5f, Color.red);
@@ -33,6 +35,7 @@ public class PlayerBehaviour : MonoBehaviour {
 		headTransform = transform.GetChild(2);
 		playerCamera = transform.GetChild(3);
 		healthBar.SetMaxHealth(maxHealth);
+		animator = GetComponent<Animator>();
 	}
 
 	// Start is called before the first frame update
@@ -59,9 +62,9 @@ public class PlayerBehaviour : MonoBehaviour {
 			GameManager.Instance.SetGameMessage("Axe Equipped");
 			currentDevice = axe;
 		}
-		if (Input.GetKeyDown(KeyCode.T)) {
-			Quaternion applyRotation = headTransform.rotation;
-			applyRotation.x = playerCamera.transform.localRotation.x;
+		if (Input.GetKeyDown(KeyCode.T) || Input.GetKeyDown(KeyCode.Mouse0)) {
+			animator.SetTrigger("isAttacking");
+			Quaternion applyRotation = Quaternion.Euler(playerCamera.eulerAngles.x, headTransform.eulerAngles.y, headTransform.eulerAngles.z);
 			Instantiate(currentDevice, headTransform.position + (Vector3.down + transform.forward) * 0.5f, applyRotation);
 		}
 	}
