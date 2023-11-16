@@ -6,7 +6,6 @@ public class RestorationPointBehaviour : MonoBehaviour
 {
 	private GameObject NPC;
 	public float targetRange = 4.0f;
-	private bool replenished = false;
 
 	private ParticleSystem circleEffect;
 	private ParticleSystem verticalEffect;
@@ -26,19 +25,13 @@ public class RestorationPointBehaviour : MonoBehaviour
 			bool inRange = Vector3.Distance(transform.position, NPC.transform.position) <= targetRange;
 			if (inRange)
 			{
-				transform.GetComponent<Renderer>().material.color = Color.green;
-				if (!replenished)
+				MonsterBehaviour monsterBehaviour = NPC.GetComponent<MonsterBehaviour>();
+				if (monsterBehaviour.GetCurrentState() == MonsterState.replenish)
 				{
-					replenished = true;
-					NPC.GetComponent<MonsterBehaviour>().Replenish();
+					monsterBehaviour.Replenish();
 					verticalEffect.Play();
 					circleEffect.Play();
 				}
-			}
-			else
-			{
-				replenished = false;
-				transform.GetComponent<Renderer>().material.color = Color.red;
 			}
 		}
 	}
