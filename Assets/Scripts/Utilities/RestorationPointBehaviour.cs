@@ -5,13 +5,18 @@ using UnityEngine;
 public class RestorationPointBehaviour : MonoBehaviour
 {
 	private GameObject NPC;
-	public float targetRange = 5.0f;
+	public float targetRange = 4.0f;
 	private bool replenished = false;
+
+	private ParticleSystem circleEffect;
+	private ParticleSystem verticalEffect;
 
 	// Start is called before the first frame update
 	void Start()
 	{
 		NPC = GameObject.FindWithTag("NPC");
+		circleEffect = transform.GetChild(0).GetComponent<ParticleSystem>();
+		verticalEffect = transform.GetChild(1).GetComponent<ParticleSystem>();
 		StartCoroutine(DistanceCoroutine());
 	}
 
@@ -21,17 +26,19 @@ public class RestorationPointBehaviour : MonoBehaviour
 			bool inRange = Vector3.Distance(transform.position, NPC.transform.position) <= targetRange;
 			if (inRange)
 			{
-				transform.parent.GetComponent<Renderer>().material.color = Color.green;
+				transform.GetComponent<Renderer>().material.color = Color.green;
 				if (!replenished)
 				{
 					replenished = true;
 					NPC.GetComponent<MonsterBehaviour>().Replenish();
+					verticalEffect.Play();
+					circleEffect.Play();
 				}
 			}
 			else
 			{
 				replenished = false;
-				transform.parent.GetComponent<Renderer>().material.color = Color.red;
+				transform.GetComponent<Renderer>().material.color = Color.red;
 			}
 		}
 	}

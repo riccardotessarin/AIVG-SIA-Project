@@ -588,6 +588,7 @@ public class MonsterBehaviour : MonoBehaviour
 	public void Attack() {
 		Debug.Log("Attacking");
 		isAttacking = true;
+		transform.LookAt(player.transform);
 		player.GetComponent<PlayerBehaviour>().TakeDamage(10f);
 		animator.SetTrigger("isAttacking");
 		isAttacking = false;
