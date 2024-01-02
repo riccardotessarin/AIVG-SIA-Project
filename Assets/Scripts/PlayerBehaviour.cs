@@ -50,6 +50,10 @@ public class PlayerBehaviour : MonoBehaviour {
 	// Update is called once per frame
 	void Update()
 	{
+		if (GameManager.GameIsPaused || GameManager.GameHasEnded) {
+			return;
+		}
+		
 		if (Input.GetKeyDown(KeyCode.Alpha1)) {
 			GameManager.Instance.SetGameMessage("Rock Equipped");
 			currentDevice = rock;

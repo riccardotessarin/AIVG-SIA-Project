@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour {
 
 	public GameStructure structure;
 	public GameState state;
-	bool gameHasEnded = false;
+	public static bool GameHasEnded = false;
 	public GameObject gameOverUI;
 	public static event Action<GameStructure> GameStructureChanged;
 	public static event Action<GameState> GameStateChanged;
@@ -106,9 +106,9 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void GameOver() {
-		if ( gameHasEnded == false ) {
-			gameHasEnded = true;
-			RPGInputManager.DisableInputActions();
+		if ( GameHasEnded == false ) {
+			GameHasEnded = true;
+			UpdateGameState(GameState.Pause);
 			gameOverUI.SetActive(true);
 			Time.timeScale = 0f;
 			AudioListener.pause = true;
@@ -117,12 +117,11 @@ public class GameManager : MonoBehaviour {
 
 	// Restart game if player clicks on restart button
 	public void RestartGame() {
-		gameHasEnded = false;
-		RPGInputManager.EnableInputActions();
+		GameHasEnded = false;
 		gameOverUI.SetActive(false);
 		Time.timeScale = 1f;
 		AudioListener.pause = false;
-		//UpdateGameState(GameState.Play);
+		UpdateGameState(GameState.Play);
 		SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 	}
 	
@@ -152,9 +151,8 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void Pause() {
-		if( !GameIsPaused ) {
+		if( !GameIsPaused && !GameHasEnded ) {
 			UpdateGameState(GameState.Pause);
-			RPGInputManager.DisableInputActions();
 			pauseMenuUI.SetActive(true);
 			Time.timeScale = 0f;
 			GameIsPaused = true;
@@ -166,7 +164,6 @@ public class GameManager : MonoBehaviour {
 		if ( GameIsPaused ) {
 			UpdateGameState(GameState.Play);
 			pauseMenuUI.SetActive(false);
-			RPGInputManager.EnableInputActions();
 			Time.timeScale = 1f;
 			GameIsPaused = false;
 			AudioListener.pause = false;
