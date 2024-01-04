@@ -11,33 +11,34 @@ public class MonsterBehaviour : MonoBehaviour
 	public GameObject player;
 
 	private Rigidbody rb;
-
 	private Animator animator;
 
-	private Coroutine coroutineFSM;
+	private Coroutine coroutineFSM;	// Handle for the UpdateFSM coroutine, used when switching between FSM and FAM
+	private float reactionTime = 1.5f;
+	private float hungerStep = 0.5f;	// Hunger increase per second
+	private float sleepinessStep = 0.5f;	// Sleepiness increase per second
+	private float stressStep = 1f;	// Stress decrease per second
+	private float grudgeStep = 0.1f;	// Grudge decrease per second
+	private float liveUpdateStep = 1f;	// Time interval for updating the NPC's MS and PS
 
-	
 	DragBehaviour dragBehaviour;
 	AvoidBehaviourVolume avoidBehaviourVolume;
 	SeekBehaviour seekBehaviour;
-	//FleeBehaviour fleeBehaviour;
 	FreeFleeBehaviour freeFleeBehaviour;
-	//FreeRoamingBehaviour freeRoamingBehaviour;
 	SeekRestoreBehaviour seekRestoreBehaviour;
+	private bool sensedPlayer = false;
+	private float maxSeekTime = 15f;
+	private Coroutine seekCoroutine = null;
 
-	private float reactionTime = 1.5f;
-	
+	// Max speed values for NPC movement in different states
 	private Dictionary<string, float> monsterSpeed = new Dictionary<string, float> {
 		{ "roam", 1f },
 		{ "flee", 2.5f },
 		{ "chase", 5f },
 		{ "berserk", 8f }
 	};
-
 	public float minLinearSpeed = 0.5f;
-	public float currentSpeed;
-	//public float maxLinearSpeed = 5f;
-	//public float maxAngularSpeed = 5f;
+	public float currentMaxSpeed;	// Used for both linear and angular speed
 	private MovementStatus status;
 
 	private float health = 100f;
@@ -46,6 +47,20 @@ public class MonsterBehaviour : MonoBehaviour
 	private float stress = 0f;
 	private float grudge = 0f;
 
+	private bool isRoaming = false;
+	private bool isReplenishing = false;
+	private bool isHealing = false;
+	private bool isSleeping = false;
+	private bool isEating = false;
+	private bool isFleeing = false;
+	private bool isChasing = false;
+	private bool isChasingBerserk = false;
+	private bool isAttacking = false;
+	private float maxPlayerDistance = 10f;
+	private float maxattackRange = 2f;
+	private float attackPower = 10f;
+
+	// Rage multiplier to amplify or dampen stress and grudge from attacks depending on the current state
 	private Dictionary<MonsterState, float> rageMultiplier = new Dictionary<MonsterState, float> {
 		{ MonsterState.calm, 0.5f },
 		{ MonsterState.annoyed, 1f },
@@ -61,25 +76,12 @@ public class MonsterBehaviour : MonoBehaviour
 	private DecisionTree replenishDT;
 	private DecisionTree angryDT;
 	private DecisionTree berserkDT;
-
-	private bool isRoaming = false;
-	private bool isReplenishing = false;
-	private bool isHealing = false;
-	private bool isSleeping = false;
-	private bool isEating = false;
-	private bool isFleeing = false;
-	private bool isChasing = false;
-	private bool isChasingBerserk = false;
-	private bool isAttacking = false;
-	private float maxPlayerDistance = 10f;
-	private float maxattackRange = 2f;
-
 	
 	private MonsterState currentState;
 	
     private void Awake() {
 		currentState = MonsterState.calm;
-		currentSpeed = monsterSpeed["roam"];
+		currentMaxSpeed = monsterSpeed["roam"];
 		rb = GetComponent<Rigidbody>();
 		animator = GetComponent<Animator>();
 	}
@@ -91,9 +93,7 @@ public class MonsterBehaviour : MonoBehaviour
 		dragBehaviour = GetComponent<DragBehaviour>();
 		avoidBehaviourVolume = GetComponent<AvoidBehaviourVolume>();
 		seekBehaviour = GetComponent<SeekBehaviour>();
-		//fleeBehaviour = GetComponent<FleeBehaviour>();
 		freeFleeBehaviour = GetComponent<FreeFleeBehaviour>();
-		//freeRoamingBehaviour = GetComponent<FreeRoamingBehaviour>();
 		seekRestoreBehaviour = GetComponent<SeekRestoreBehaviour>();
 
 		#region FSM setup
@@ -104,8 +104,14 @@ public class MonsterBehaviour : MonoBehaviour
 		FSMState angryState = new FSMState(MonsterState.angry);
 		FSMState berserkState = new FSMState(MonsterState.berserk);
 
-		// Define DT transitions for each state
-		// From calm state
+		// Define DT transitions for each state.
+		/* NOTE: if we want to stay in the same state, we don't need to add a link:
+		 * We can either explicitly add the link or not, the FSM Update won't trigger transitions
+		 * if the current state is the same as the next or if the walk does not return an FSMState.
+		 * We leave the link to the same state commented for convenience.
+		*/
+
+		// From calm state...
 		DTDecision calmd1 = new DTDecision(GoodPhysicalStatus);
 		DTDecision calmd2 = new DTDecision(GoodMentalStatus);
 		DTDecision calmd3 = new DTDecision(IsAngry);
@@ -113,12 +119,12 @@ public class MonsterBehaviour : MonoBehaviour
 		// Define links between decisions
 		calmd1.AddLink(true, calmd2);
 		calmd1.AddLink(false, replenishState);
-		//calmd2.AddLink(true, calmState); // NOTE: if we want to stay in the same state, we don't need to add a link
+		//calmd2.AddLink(true, calmState); 
 		calmd2.AddLink(false, calmd3);
 		calmd3.AddLink(true, angryState);
 		calmd3.AddLink(false, annoyedState);
 
-		// From annoyed state
+		// From annoyed state...
 		DTDecision annoyedd1 = new DTDecision(GoodPhysicalStatus);
 		DTDecision annoyedd2 = new DTDecision(GoodMentalStatus);
 		DTDecision annoyedd3 = new DTDecision(IsAngry);
@@ -129,9 +135,9 @@ public class MonsterBehaviour : MonoBehaviour
 		annoyedd2.AddLink(true, calmState);
 		annoyedd2.AddLink(false, annoyedd3);
 		annoyedd3.AddLink(true, angryState);
-		//annoyedd3.AddLink(false, annoyedState); // NOTE: if we want to stay in the same state, we don't need to add a link
+		//annoyedd3.AddLink(false, annoyedState);
 
-		// From replenish state
+		// From replenish state...
 		DTDecision replenishd1 = new DTDecision(GoodMentalStatus);
 		DTDecision replenishd2 = new DTDecision(GoodPhysicalStatus);
 		DTDecision replenishd2bis = new DTDecision(GoodPhysicalStatus);
@@ -142,16 +148,16 @@ public class MonsterBehaviour : MonoBehaviour
 		replenishd1.AddLink(true, replenishd2);
 		replenishd1.AddLink(false, replenishd2bis);
 		replenishd2.AddLink(true, calmState);
-		//replenishd2.AddLink(false, replenishState); // NOTE: if we want to stay in the same state, we don't need to add a link
+		//replenishd2.AddLink(false, replenishState);
 		replenishd2bis.AddLink(true, replenishd3);
 		replenishd2bis.AddLink(false, replenishd4);
 		replenishd3.AddLink(true, angryState);
 		replenishd3.AddLink(false, annoyedState);
 		replenishd4.AddLink(true, berserkState);
-		//replenishd4.AddLink(false, replenishState); // NOTE: if we want to stay in the same state, we don't need to add a link
+		//replenishd4.AddLink(false, replenishState);
 
 
-		// From angry state
+		// From angry state...
 		DTDecision angryd1 = new DTDecision(GoodPhysicalStatus);
 		DTDecision angryd2 = new DTDecision(GoodMentalStatus);
 		DTDecision angryd3 = new DTDecision(PlayerInRange);
@@ -166,8 +172,7 @@ public class MonsterBehaviour : MonoBehaviour
 		angryd3.AddLink(false, replenishState);
 		angryd4.AddLink(false, annoyedState);
 
-		// From berserk state
-		//DTDecision berserkd2 = new DTDecision(GoodPhysicalStatus);
+		// From berserk state...
 		DTDecision berserkd1 = new DTDecision(GoodMentalStatus);
 		DTDecision berserkd2 = new DTDecision(PlayerInRange);
 
@@ -175,7 +180,7 @@ public class MonsterBehaviour : MonoBehaviour
 		berserkd1.AddLink(true, replenishState);
 		berserkd1.AddLink(false, berserkd2);
 		berserkd2.AddLink(false, replenishState);
-		//berserkd1.AddLink(false, berserkState); // NOTE: if we want to stay in the same state, we don't need to add a link
+		//berserkd1.AddLink(false, berserkState);
 
 		// Setup my DecisionTree at the root node
 		calmDT = new DecisionTree(calmd1);
@@ -212,11 +217,13 @@ public class MonsterBehaviour : MonoBehaviour
 		#endregion
 		
 		monsterFSM = new FSM(calmState);
+		// This dictionary is only useful when switching between FSM and FAM...
 		monsterFSM.states.Add(MonsterState.calm, calmState);
 		monsterFSM.states.Add(MonsterState.annoyed, annoyedState);
 		monsterFSM.states.Add(MonsterState.angry, angryState);
 		monsterFSM.states.Add(MonsterState.replenish, replenishState);
 		monsterFSM.states.Add(MonsterState.berserk, berserkState);
+		// ...so we can use it to explicitly set the current state when switching back to FSM
 
 		if (!GameManager.Instance.useFAM) {
 			monsterFSM.EnterFirstState();
@@ -233,82 +240,85 @@ public class MonsterBehaviour : MonoBehaviour
 		}
 	}
 
+	// Stops the FSM coroutine to switch to FAM
 	public void StopFSM() {
 		if (coroutineFSM != null) {
 			StopCoroutine(coroutineFSM);
 		}
 	}
 
+	// Called to start the FSM update when switching from FAM to FSM
 	public void StartFSM() {
 		monsterFSM.SetCurrentState(currentState);
 		coroutineFSM = StartCoroutine(UpdateFSM());
 	}
 
+	// Increases NPC's hunger and sleepiness over time
 	public IEnumerator LivePhysicalStatus() {
 		while (true) {
 			if (hunger < 100f) {
-				hunger += 0.5f;
+				hunger += hungerStep;
 			}
 			if (sleepiness < 100f) {
-				sleepiness += 0.5f;
+				sleepiness += sleepinessStep;
 			}
-			yield return new WaitForSeconds(1f);
+			yield return new WaitForSeconds(liveUpdateStep);
 		}
 	}
 
+	// Decreases NPC's stress and grudge over time
 	public IEnumerator LiveMentalStatus() {
 		while (true) {
-			stress = stress - 1.0f > 0f ? stress - 1.0f : 0f;
-			grudge = grudge - 0.1f > 0f ? grudge - 0.1f : 0f;
-			yield return new WaitForSeconds(1f);
+			stress = stress - stressStep > 0f ? stress - stressStep : 0f;
+			grudge = grudge - grudgeStep > 0f ? grudge - grudgeStep : 0f;
+			yield return new WaitForSeconds(liveUpdateStep);
 		}
 	}
 
 
-	// Update is called once per frame
 	void Update()
 	{
+		// Set running/walking animation based on current speed
 		if (status.linearSpeed > 3f) {
 			animator.SetBool("isRunning", true);
 		} else {
 			animator.SetBool("isRunning", false);
 		}
 
+		// Used for logging to in-game UI
 		string logText = currentState + "\n" + health + "\n" + hunger + "\n" + sleepiness + "\n" + stress + "\n" + grudge;
-
 		GameManager.Instance.SetNPCLoggingText(logText);
 
-		if (Input.GetKeyDown(KeyCode.Return)) {
-			Debug.Log("Current stats: " + health + " " + hunger + " " + sleepiness + " " + stress + " " + grudge);
+		// Only used for debugging to manually increase/decrease status values
+		bool debugging = false;
+		if (debugging) {
+			if (Input.GetKeyDown(KeyCode.Return)) {
+				health = 100f;
+				hunger = 0f;
+				sleepiness = 0f;
+				stress = 0f;
+				grudge = 0f;
+			}
+			if (Input.GetKeyDown(KeyCode.Z)) {
+				health -= 20f;
+				Debug.Log("Health: " + health);
+			}
+			if (Input.GetKeyDown(KeyCode.X)) {
+				stress += 20f;
+				Debug.Log("Stress: " + stress);
+			}
+			if (Input.GetKeyDown(KeyCode.C)) {
+				grudge += 20f;
+				Debug.Log("Grudge: " + grudge);
+			}
 		}
-		
-		if (Input.GetKeyDown(KeyCode.Space)) {
-			health = 100f;
-			hunger = 0f;
-			sleepiness = 0f;
-			stress = 0f;
-			grudge = 0f;
-		}
-		if (Input.GetKeyDown(KeyCode.H)) {
-			health -= 20f;
-			Debug.Log("Health: " + health);
-		}
-		if (Input.GetKeyDown(KeyCode.S)) {
-			stress += 20f;
-			Debug.Log("Stress: " + stress);
-		}
-		if (Input.GetKeyDown(KeyCode.G)) {
-			grudge += 20f;
-			Debug.Log("Grudge: " + grudge);
-		}
-
 	}
 	
 	
 	private void FixedUpdate() {
 		status.movementDirection = transform.forward;
 
-		// Contact al behaviours and build a list of directions
+		// List of directions to blend obtained from each behaviour
 		List<Vector3> components = new List<Vector3>();
 		
 		components.Add(dragBehaviour.GetAcceleration(status));
@@ -359,13 +369,12 @@ public class MonsterBehaviour : MonoBehaviour
 
 		// if we have an acceleration, apply it
 		if (blendedAcceleration.magnitude != 0f) {
-			Driver.Steer(rb, status, blendedAcceleration, minLinearSpeed, currentSpeed, currentSpeed);
-			//Driver.Steer(rb, status, blendedAcceleration, minLinearSpeed, maxLinearSpeed, maxAngularSpeed);
+			Driver.Steer(rb, status, blendedAcceleration, minLinearSpeed, currentMaxSpeed, currentMaxSpeed);
 		}
 	}
 
 
-	
+	// Region for both decision tree's and general decisions
 	#region Decisions
 
 	private object GoodPhysicalStatus(object o) {
@@ -375,6 +384,7 @@ public class MonsterBehaviour : MonoBehaviour
 		return false;
 	}
 
+	// This only tests stress to check if it has some sort of mental status discomfort...
 	private object GoodMentalStatus(object o) {
 		if (stress < 10) {
 			return true;
@@ -382,15 +392,18 @@ public class MonsterBehaviour : MonoBehaviour
 		return false;
 	}
 
-	private object PlayerInRange(object o) {
-		if (Vector3.Distance(transform.position, player.transform.position) < maxPlayerDistance) {
+	// ...while this tests both stress and grudge to check if the NPC is angry. These two work together
+	// to determine the emotional state of the NPC
+	private object IsAngry(object o) {
+		if (stress + grudge > 100f) {
 			return true;
 		}
 		return false;
 	}
 
-	private object IsAngry(object o) {
-		if (stress + grudge > 100f) {
+	// This only checks if the player is inside a certain range, the NPC can "sense" the player presence
+	private object PlayerInRange(object o) {
+		if (Vector3.Distance(transform.position, player.transform.position) < maxPlayerDistance) {
 			return true;
 		}
 		return false;
@@ -403,15 +416,12 @@ public class MonsterBehaviour : MonoBehaviour
 		return false;
 	}
 	
-	private bool sensedPlayer = false;
-	private float maxSeekTime = 15f;
-	private Coroutine seekCoroutine = null;
-
+	// This checks if the NPC can see the player (returning true will start the seek behaviour)
 	private bool CanSeePlayer(){
 		RaycastHit hit;
 		Vector3 headPosition = transform.GetChild(2).position;
 		Vector3 playerHeadPosition = player.transform.GetChild(2).position;
-		Vector3 rayDirection = playerHeadPosition - headPosition;
+		Vector3 rayDirection = playerHeadPosition - headPosition;	// Placed empty game objects at the heads positions for convenience
 		if (Physics.Raycast(headPosition, rayDirection, out hit, maxPlayerDistance)
 				&& Vector3.Angle(rayDirection, transform.forward) < 90f) {
 			if (hit.collider.gameObject == player) {
@@ -432,7 +442,7 @@ public class MonsterBehaviour : MonoBehaviour
 		return false;
 	}
 
-	// This function destroys the device after a certain time if it doesn't hit anything
+	// This function sets a timer to stop seeking the player after a certain amount of time and resume normal free roaming
 	private IEnumerator TargetedSeeking(float giveUpTime) {
 		Debug.Log("Start seeking targeted...");
 		yield return new WaitForSecondsRealtime(giveUpTime);
@@ -445,37 +455,9 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StartRoaming() {
 		isRoaming = true;
-		currentSpeed = monsterSpeed["roam"];
+		currentMaxSpeed = monsterSpeed["roam"];
 		currentState = MonsterState.calm;
 	}
-
-	/*
-
-	// Function for free map roaming
-
-	private float stopAt = 0.1f;
-	private Vector3 targetRandomPosition = new Vector3(20, 1, 20);
-	private float time = 0f;
-	private float timeToTarget = 5f;
-
-	public void Roam() {
-		Debug.Log("Roaming to destination...");
-
-		Vector3 verticalAdj = new Vector3(targetRandomPosition.x, transform.position.y, targetRandomPosition.z);
-		Vector3 toDestination = verticalAdj - transform.position;
-
-		if (stopAt > toDestination.magnitude || time > timeToTarget) {
-			targetRandomPosition = UnityEngine.Random.onUnitSphere*UnityEngine.Random.Range(10f, 20f);
-			time = 0f;
-		} else {
-			// we keep only option a
-			transform.LookAt(verticalAdj);
-			rb.MovePosition(rb.position + transform.forward * currentSpeed * Time.deltaTime);
-			time += Time.deltaTime;
-		}
-	}
-
-	*/
 
 	public void StopRoaming() {
 		isRoaming = false;
@@ -484,21 +466,23 @@ public class MonsterBehaviour : MonoBehaviour
 	public void StartFleeing() {
 		isFleeing = true;
 		freeFleeBehaviour.SetIsFleeing(true);
-		currentSpeed = monsterSpeed["flee"];
+		currentMaxSpeed = monsterSpeed["flee"];
 		currentState = MonsterState.annoyed;
 	}
 
+	// Annoyed stay action to increase max flee speed when the player is in range
 	public void Flee() {
 		//Debug.Log("Started fleeing");
 		if (freeFleeBehaviour.PlayerInRange()) {
 			//Debug.Log("Player in range");
-			currentSpeed = Mathf.Lerp(monsterSpeed["flee"], monsterSpeed["flee"]*2, freeFleeBehaviour.GetPercentage());
+			currentMaxSpeed = Mathf.Lerp(monsterSpeed["flee"], monsterSpeed["flee"]*2, freeFleeBehaviour.GetPercentage());
 		} else {
 			//Debug.Log("Player not in range");
-			currentSpeed = monsterSpeed["flee"];
+			currentMaxSpeed = monsterSpeed["flee"];
 		}
 	}
 
+	// Stay action for various states to increase grudge over time (when it is not calm, it builds up grudge)
 	public void IncreaseGrudge() {
 		grudge = grudge + reactionTime > 100f ? 100f : grudge + reactionTime;
 	}
@@ -513,15 +497,15 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StartAngry() {
 		isChasing = true;
-		currentSpeed = monsterSpeed["chase"];
+		currentMaxSpeed = monsterSpeed["chase"];
 		currentState = MonsterState.angry;
 	}
 
+	// Decrease stress by 20% and grudge by 10%
+	// FSM will take care of the transition to less-angry states
 	public void AngryAttack() {
 		if(PlayerInAttackRange()) {
 			Attack();
-			// Decrease stress by 20% and grudge by 10%
-			// FSM will take care of the transition to the calm state
 			stress *= 0.8f;
 			grudge *= 0.9f;
 		}
@@ -538,15 +522,15 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StartBerserk() {
 		isChasingBerserk = true;
-		currentSpeed = monsterSpeed["berserk"];
+		currentMaxSpeed = monsterSpeed["berserk"];
 		currentState = MonsterState.berserk;
 	}
 
+	// Decrease stress by 10% and grudge by 5%
+	// FSM will take care to transition back to the replenish state
 	public void BerserkAttack() {
 		if(PlayerInAttackRange()) {
 			Attack();
-			// Decrease stress by 10% and grudge by 5%
-			// FSM will take care to transition back to the replenish state
 			stress *= 0.9f;
 			grudge *= 0.95f;
 		}
@@ -563,12 +547,11 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StartReplenishing() {
 		isReplenishing = true;
-		currentSpeed = monsterSpeed["flee"];
+		currentMaxSpeed = monsterSpeed["flee"];
 		currentState = MonsterState.replenish;
 	}
 
 	public void Replenish() {
-		Debug.Log("Replenishing");
 		health = 100f;
 		hunger = 0f;
 		sleepiness = 0f;
@@ -589,19 +572,18 @@ public class MonsterBehaviour : MonoBehaviour
 		Debug.Log("Attacking");
 		isAttacking = true;
 		transform.LookAt(player.transform);
-		player.GetComponent<PlayerBehaviour>().TakeDamage(10f);
+		player.GetComponent<PlayerBehaviour>().TakeDamage(attackPower);
 		animator.SetTrigger("isAttacking");
 		isAttacking = false;
 	}
 
+	// Only for demo purposes, the NPC can't die in easy mode
 	public void TakeDamage(float damage, float stressDamage, float grudgeDamage) {
-		// Only for demo purposes, the monster can't die
 		health = health - damage < 0f ? 0f : health - damage;
 		stressDamage *= rageMultiplier[currentState];
 		grudgeDamage *= rageMultiplier[currentState];
 		stress = stress + stressDamage > 100f ? 100f : stress + stressDamage;
 		grudge = grudge + grudgeDamage > 100f ? 100f : grudge + grudgeDamage;
-		Debug.Log("Easy Mode: " + GameManager.Instance.easyMode);
 		if (health == 0f && !GameManager.Instance.easyMode) {
 			GameManager.Instance.GameOver();
 		}

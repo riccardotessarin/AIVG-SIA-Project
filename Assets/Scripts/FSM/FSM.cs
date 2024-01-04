@@ -50,27 +50,12 @@ public class FSM {
 
 	// This is the new Update method, using the decision tree
 	public void Update() {
-		//Debug.Log("Current state: " + current.stateName + "");
-		//DecisionTree transition = current.VerifyTransitions ();
 		if (current.transionTree.walk() is FSMState transition && transition != current) {
 			current.Exit();
+			GameManager.Instance.SetGameMessage("State changed from " + current.stateName + " to " + transition.stateName);
 			current = transition;
 			current.Enter();
-			Debug.Log("New state: " + current.stateName + "");
 		}
 		current.Stay();
-		/*
-		FSMState transition = current.transionTree.walk();
-		if (transition != null) {
-			current.Exit();		// 1
-			//transition.Fire();	// 2
-			//current = current.NextState(transition);	// 3
-			current = transition;
-			current.Enter();	// 4
-			Debug.Log("New state: " + current.stateName + "");
-		} else {
-			current.Stay();		// 5
-		}
-		*/
 	}
 }
