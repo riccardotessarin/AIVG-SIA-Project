@@ -47,15 +47,9 @@ public class MonsterBehaviour : MonoBehaviour
 	private float stress = 0f;
 	private float grudge = 0f;
 
-	private bool isRoaming = false;
-	private bool isReplenishing = false;
 	private bool isHealing = false;
 	private bool isSleeping = false;
 	private bool isEating = false;
-	private bool isFleeing = false;
-	private bool isChasing = false;
-	private bool isChasingBerserk = false;
-	private bool isAttacking = false;
 	private float maxPlayerDistance = 10f;
 	private float maxattackRange = 2f;
 	private float attackPower = 10f;
@@ -328,18 +322,14 @@ public class MonsterBehaviour : MonoBehaviour
 		switch (currentState)
 		{
 			case MonsterState.calm:
-				if (isRoaming) {
-					components.Add(freeFleeBehaviour.GetAcceleration(status));
-				}
+				components.Add(freeFleeBehaviour.GetAcceleration(status));
 				break;
 			case MonsterState.annoyed:
-				if (isFleeing) {
-					// Continues free roaming while also avoiding the player
-					components.Add(freeFleeBehaviour.GetAcceleration(status));
-				}
+				// Continues free roaming while also avoiding the player
+				components.Add(freeFleeBehaviour.GetAcceleration(status));
 				break;
 			case MonsterState.angry:
-				if (isChasing && CanSeePlayer()) {
+				if (CanSeePlayer()) {
 					components.Add(seekBehaviour.GetAcceleration(status));
 				} else {
 					// Continues free roaming
@@ -347,7 +337,7 @@ public class MonsterBehaviour : MonoBehaviour
 				}
 				break;
 			case MonsterState.berserk:
-				if (isChasingBerserk && CanSeePlayer()) {
+				if (CanSeePlayer()) {
 					components.Add(seekBehaviour.GetAcceleration(status));
 				} else {
 					// Continues free roaming
@@ -355,10 +345,8 @@ public class MonsterBehaviour : MonoBehaviour
 				}
 				break;
 			case MonsterState.replenish:
-				if (isReplenishing) {
-					// Tries to reach the restoration point while also avoiding the player
-					components.Add(seekRestoreBehaviour.GetAcceleration(status));
-				}
+				// Tries to reach the restoration point while also avoiding the player
+				components.Add(seekRestoreBehaviour.GetAcceleration(status));
 				break;
 			default:
 				break;
@@ -454,17 +442,14 @@ public class MonsterBehaviour : MonoBehaviour
 	#region Actions
 
 	public void StartRoaming() {
-		isRoaming = true;
 		currentMaxSpeed = monsterSpeed["roam"];
 		currentState = MonsterState.calm;
 	}
 
 	public void StopRoaming() {
-		isRoaming = false;
 	}
 
 	public void StartFleeing() {
-		isFleeing = true;
 		freeFleeBehaviour.SetIsFleeing(true);
 		currentMaxSpeed = monsterSpeed["flee"];
 		currentState = MonsterState.annoyed;
@@ -488,15 +473,10 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	public void StopFleeing() {
-		isFleeing = false;
 		freeFleeBehaviour.SetIsFleeing(false);
-		if (isAttacking) {
-			isAttacking = false;
-		}
 	}
 
 	public void StartAngry() {
-		isChasing = true;
 		currentMaxSpeed = monsterSpeed["chase"];
 		currentState = MonsterState.angry;
 	}
@@ -505,23 +485,18 @@ public class MonsterBehaviour : MonoBehaviour
 	// FSM will take care of the transition to less-angry states
 	public void AngryAttack() {
 		if(PlayerInAttackRange()) {
-			Attack();
+			StartCoroutine(Attack());
 			stress *= 0.8f;
 			grudge *= 0.9f;
 		}
 	}
 
 	public void StopAngry() {
-		isChasing = false;
 		if (seekCoroutine != null) { StopCoroutine(seekCoroutine); }
 		freeFleeBehaviour.SetIsSeeking(false);
-		if (isAttacking) {
-			isAttacking = false;
-		}
 	}
 
 	public void StartBerserk() {
-		isChasingBerserk = true;
 		currentMaxSpeed = monsterSpeed["berserk"];
 		currentState = MonsterState.berserk;
 	}
@@ -530,23 +505,18 @@ public class MonsterBehaviour : MonoBehaviour
 	// FSM will take care to transition back to the replenish state
 	public void BerserkAttack() {
 		if(PlayerInAttackRange()) {
-			Attack();
+			StartCoroutine(Attack());
 			stress *= 0.9f;
 			grudge *= 0.95f;
 		}
 	}
 
 	public void StopBerserk() {
-		isChasingBerserk = false;
 		if (seekCoroutine != null) { StopCoroutine(seekCoroutine); }
 		freeFleeBehaviour.SetIsSeeking(false);
-		if (isAttacking) {
-			isAttacking = false;
-		}
 	}
 
 	public void StartReplenishing() {
-		isReplenishing = true;
 		currentMaxSpeed = monsterSpeed["flee"];
 		currentState = MonsterState.replenish;
 	}
@@ -558,9 +528,6 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	public void StopReplenishing() {
-		if (isReplenishing) {
-			isReplenishing = false;
-		}
 		if (isHealing || isEating || isSleeping) {
 			isHealing = false;
 			isEating = false;
@@ -568,13 +535,12 @@ public class MonsterBehaviour : MonoBehaviour
 		}
 	}
 
-	public void Attack() {
+	private IEnumerator Attack() {
 		Debug.Log("Attacking");
-		isAttacking = true;
 		transform.LookAt(player.transform);
 		player.GetComponent<PlayerBehaviour>().TakeDamage(attackPower);
 		animator.SetTrigger("isAttacking");
-		isAttacking = false;
+		yield return null;
 	}
 
 	// Only for demo purposes, the NPC can't die in easy mode
