@@ -1,3 +1,8 @@
+/*
+ * Script only for testing purposes of the FAM system inside the FAMTest scene.
+ * Not used inside the game.
+*/
+
 using System.Collections;
 using System.Collections.Generic;
 using System;

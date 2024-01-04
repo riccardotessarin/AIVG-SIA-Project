@@ -12,7 +12,7 @@ public abstract class MovementBehaviour : MonoBehaviour {
 	protected float sightRange;
 	protected float sightAngle;
 	[SerializeField]
-	protected float steer; // Maybe make it 30 for avoid behaviour volume
+	protected float steer;
 	protected float backpedal;
 	protected float gas;
 	protected float brake;
@@ -22,7 +22,6 @@ public abstract class MovementBehaviour : MonoBehaviour {
 	[SerializeField]
 	protected float fleeRange;
 	
-
 	void Start()
 	{
 		sightRange = GameManager.Instance.sightRange;
@@ -31,7 +30,7 @@ public abstract class MovementBehaviour : MonoBehaviour {
 		backpedal = GameManager.Instance.backpedal;
 		gas = GameManager.Instance.gas;
 		brake = GameManager.Instance.brake;
-		brakeAt = GameManager.Instance.brakeAt; // Check if this can be shared by all behaviours or revert to 5 (1 only for seek)
+		brakeAt = GameManager.Instance.brakeAt;
 		stopAt = GameManager.Instance.stopAt;
 		fleeRange = GameManager.Instance.fleeRange;
 	}
@@ -47,7 +46,7 @@ public class Blender {
 	}
 }
 
-// The steer function is the same as the FixedUpdate of DGripSteering
+// Steer applies the given blended acceleration vector to the rigidbody
 public class Driver {
 	public static void Steer (Rigidbody body, MovementStatus status, Vector3 acceleration,
 		                                float minV, float maxV, float maxSigma) {

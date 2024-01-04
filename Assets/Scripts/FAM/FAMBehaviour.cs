@@ -282,19 +282,19 @@ public class FAMBehaviour : MonoBehaviour
 		physicalFAM.Calculate();
 		mentalFAM.Calculate();
 
-		Debug.Log("Mental status: " + mentalstatus.MembershipValues[FuzzyClass.low] + ", " + mentalstatus.MembershipValues[FuzzyClass.medium] + ", " + mentalstatus.MembershipValues[FuzzyClass.high]);
-		Debug.Log("Physical status: " + physicalstatus.MembershipValues[FuzzyClass.low] + ", " + physicalstatus.MembershipValues[FuzzyClass.medium] + ", " + physicalstatus.MembershipValues[FuzzyClass.high]);
+		//Debug.Log("Mental status: " + mentalstatus.MembershipValues[FuzzyClass.low] + ", " + mentalstatus.MembershipValues[FuzzyClass.medium] + ", " + mentalstatus.MembershipValues[FuzzyClass.high]);
+		//Debug.Log("Physical status: " + physicalstatus.MembershipValues[FuzzyClass.low] + ", " + physicalstatus.MembershipValues[FuzzyClass.medium] + ", " + physicalstatus.MembershipValues[FuzzyClass.high]);
 
 		// Get the output values
 		physicalStatusValue = fuzzify.DefuzzifyMax(physicalstatus);
-		Debug.Log("Physical status value max: " + physicalStatusValue);
+		//Debug.Log("Physical status value max: " + physicalStatusValue);
 
 		// Get the output values
 		mentalStatusValue = fuzzify.DefuzzifyMax(mentalstatus);
-		Debug.Log("Mental status value max: " + mentalStatusValue);
+		//Debug.Log("Mental status value max: " + mentalStatusValue);
 
 		currentState = UpdateState();
-		Debug.Log("Current state: " + currentState.stateName);
+		//Debug.Log("Current state: " + currentState.stateName);
 
 		if(GameManager.Instance.useFAM) {
 			currentState.Enter();
@@ -413,6 +413,7 @@ public class FAMBehaviour : MonoBehaviour
 		}
 		if (UpdateState() is FAMState transition && currentState != transition) {
 			Debug.Log("State changed from " + currentState.stateName + " to " + transition.stateName);
+			GameManager.Instance.SetGameMessage("State changed from " + currentState.stateName + " to " + transition.stateName);
 			currentState.Exit(); // Exit old state
 			currentState = transition;
 			currentState.Enter(); // Enter new state

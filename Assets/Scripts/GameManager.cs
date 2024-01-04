@@ -23,9 +23,9 @@ public class GameManager : MonoBehaviour {
 	public static event Action<GameStructure> GameStructureChanged;
 	public static event Action<GameState> GameStateChanged;
 
+	#region Movement Behaviours Parameters
 	public float sightRange = 2f;
 	public float sightAngle = 45f;
-
 	public float steer = 60f; // Maybe make it 30 for avoid behaviour volume
 	public float backpedal = 10f;
 	public float gas = 3f;
@@ -33,6 +33,7 @@ public class GameManager : MonoBehaviour {
 	public float brakeAt = 1f; // Check if this can be shared by all behaviours or revert to 5 (1 only for seek)
 	public float stopAt = 0.01f;
 	public float fleeRange = 5f;
+	#endregion
 
 	public bool useFAM = true;
 	public GameObject FAMToggleUI;
@@ -41,8 +42,7 @@ public class GameManager : MonoBehaviour {
 	public GameObject gameMessagesUI;
 	private TextMeshProUGUI gameMessagesText;
 	private Coroutine messageCoroutine;
-    private bool logNPC;
-	//public GameObject NPCLoggingToggleUI;
+	private bool logNPC;
 	public TextMeshProUGUI NPCLoggingUI;
 
 
@@ -52,15 +52,11 @@ public class GameManager : MonoBehaviour {
 			//First run, set the instance
 			instance = this;
 			instance.structure = useFAM ? GameStructure.FAM : GameStructure.FSM;
-			instance.state = GameState.Play;
-			
-			// DontDestroyOnLoad(gameObject);
- 
+			instance.state = GameState.Play; 
 		}
 	}
 
 	private void Start() {
-		//UpdateGameState(instance.state);
 		FAMToggleUI.GetComponent<Toggle>().isOn = useFAM;
 		easyModeToggleUI.GetComponent<Toggle>().isOn = easyMode;
 		gameMessagesText = gameMessagesUI.GetComponent<TextMeshProUGUI>();
@@ -169,6 +165,7 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
+	// Used to show messages to the player on screen
     public void SetGameMessage(string message) {
 		if ( messageCoroutine != null ) {
 			StopCoroutine(messageCoroutine);
@@ -176,6 +173,7 @@ public class GameManager : MonoBehaviour {
 		messageCoroutine = StartCoroutine(ShowMessage(message, 1f, 1f));
 	}
 
+	// Show a message for a given time and fade it out
 	private IEnumerator ShowMessage(string message, float visibleTime, float fadeTime) {
 		gameMessagesText.text = message;
 		gameMessagesText.alpha = 1f;

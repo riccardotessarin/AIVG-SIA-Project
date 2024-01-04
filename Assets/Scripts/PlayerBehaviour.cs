@@ -50,6 +50,7 @@ public class PlayerBehaviour : MonoBehaviour {
 	// Update is called once per frame
 	void Update()
 	{
+		// Don't take inputs if the game is paused or ended
 		if (GameManager.GameIsPaused || GameManager.GameHasEnded) {
 			return;
 		}

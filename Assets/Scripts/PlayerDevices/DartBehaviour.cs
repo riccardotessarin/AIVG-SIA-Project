@@ -41,8 +41,6 @@ public class DartBehaviour : MonoBehaviour
 		float stressDamage = 10f;
 		float grudgeDamage = 4f;
 		if (monster != null) {
-			Debug.Log(monster + " hitted");
-			
 			monster.TakeDamage(dartDamage, stressDamage, grudgeDamage);
 			Destroy(gameObject);
 		}

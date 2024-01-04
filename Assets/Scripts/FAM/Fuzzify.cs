@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class Fuzzify
 {
-	//public string Name { get; set; }
 	public Dictionary<FuzzyClass, float[]> MembershipFunctions { get; set; }
 
 	public Fuzzify()

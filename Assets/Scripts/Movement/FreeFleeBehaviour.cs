@@ -5,7 +5,6 @@ public class FreeFleeBehaviour : MovementBehaviour {
 
 	public Transform fleeFrom;
 
-	//public Transform destination;
 	[SerializeField]
 	private Vector3 targetRandomPosition = new Vector3(20, 1, 20);
 	[SerializeField]
@@ -21,26 +20,16 @@ public class FreeFleeBehaviour : MovementBehaviour {
 	private float minRange = 0f;
 	private float maxRange = 20f;
 	private float maxTargetedRange = 3f;
-
-	/*
-	public float gas = 3f;
-	//public float steer = 30f;
-	public float brake = 20f;
-
-	public float brakeAt = 5f;
-	public float stopAt = 0.01f;
-
-	public float fleeRange = 5f;
-	*/
 	
-
+	// Takes random positions and moves towards them for free roaming movement
+	// If it is also fleeing (annoyed status) while roaming, it takes the flee acceleration into account
     public override Vector3 GetAcceleration(MovementStatus status) {
         if (targetRandomPosition != null) {
 			Vector3 verticalAdj = new Vector3(targetRandomPosition.x, transform.position.y, targetRandomPosition.z);
 			Vector3 toDestination = verticalAdj - transform.position;
 			
 			if (stopAt > toDestination.magnitude || time > timeToTarget) {
-				Debug.Log("Reached destination, new destination...");
+				//Debug.Log("Reached destination, new destination...");
 				targetRandomPosition = GetRandomPosition();
 				time = 0f;
 			}
@@ -54,33 +43,14 @@ public class FreeFleeBehaviour : MovementBehaviour {
 			} else {
 				return (tangentComponent * gas) + (normalComponent * steer);
 			}
-			/*
-			if (fleeFrom != null) {
-				Vector3 fleeAdj = new Vector3();
-				Vector3 vAdj = new Vector3 (fleeFrom.position.x, transform.position.y, fleeFrom.position.z);
-				Vector3 fromDest = (transform.position - vAdj);
-				if (fromDest.magnitude < fleeRange) {
-					Vector3 tanComponent = Vector3.Project (fromDest.normalized, status.movementDirection);
-					Vector3 normComponent = (fromDest.normalized - tanComponent);
-					fleeAdj = (tanComponent * gas) + (normComponent * steer);
-					inRange = true;
-					percentage = 1 - (fromDest.magnitude / fleeRange);
-				} else {
-					inRange = false;
-					fleeAdj = Vector3.zero;
-				}
-				return fleeAdj + ((tangentComponent * gas) + (normalComponent * steer));
-				//return fleeAdj + ((tangentComponent * (toDestination.magnitude > brakeAt ? gas : -brake)) + (normalComponent * steer));
-			} else {
-				return (tangentComponent * gas) + (normalComponent * steer);
-				//return (tangentComponent * (toDestination.magnitude > brakeAt ? gas : -brake)) + (normalComponent * steer);
-			}
-			*/
 		} else {
 			return Vector3.zero;
 		}
     }
 
+	// Returns a random position within a range
+	// If it is also seeking (angry or berserk) while free roaming after losing sight of the player,
+	// it returns a random position within a smaller range around the last seen position
 	public Vector3 GetRandomPosition(){
 		if (isSeeking) {
 			Debug.Log("Seeking targeted...");
@@ -90,6 +60,8 @@ public class FreeFleeBehaviour : MovementBehaviour {
 		return Random.onUnitSphere*Random.Range(10f, maxRange);
 	}
 
+	// Can explicitly set a target position
+	// If it is seeking (flag set to true), it will set the last seen position to the target position
 	public void ResetTargetRandomPosition(Transform newTarget, bool seeking = false) {
 		targetRandomPosition = new Vector3(newTarget.position.x, transform.position.y, newTarget.position.z);
 		if (seeking) {
@@ -102,6 +74,7 @@ public class FreeFleeBehaviour : MovementBehaviour {
 		return inRange;
 	}
 
+	// Returns the percentage of the flee range that the player is within
 	public float GetPercentage(){
 		return percentage;
 	}
@@ -110,22 +83,24 @@ public class FreeFleeBehaviour : MovementBehaviour {
 		isFleeing = flee;
 	}
 
+	// Mainly used from the outside to stop seeking
 	public void SetIsSeeking(bool seek){
 		Debug.Log("Giving up seeking...");
 
 		isSeeking = seek;
 	}
 
+	// Returns the flee acceleration if the player is within the flee range (annoyed status)
 	private Vector3 GetFleeAcceleration(MovementStatus status){
 		Vector3 fleeAdj = new Vector3();
 		Vector3 vAdj = new Vector3 (fleeFrom.position.x, transform.position.y, fleeFrom.position.z);
-		Vector3 fromDest = (transform.position - vAdj);
-		if (fromDest.magnitude < fleeRange) {
-			Vector3 tanComponent = Vector3.Project (fromDest.normalized, status.movementDirection);
-			Vector3 normComponent = (fromDest.normalized - tanComponent);
+		Vector3 fromFleeTarg = (transform.position - vAdj);
+		if (fromFleeTarg.magnitude < fleeRange) {
+			Vector3 tanComponent = Vector3.Project (fromFleeTarg.normalized, status.movementDirection);
+			Vector3 normComponent = (fromFleeTarg.normalized - tanComponent);
 			fleeAdj = (tanComponent * gas) + (normComponent * steer);
 			inRange = true;
-			percentage = 1 - (fromDest.magnitude / fleeRange);
+			percentage = 1 - (fromFleeTarg.magnitude / fleeRange);
 		} else {
 			inRange = false;
 			fleeAdj = Vector3.zero;

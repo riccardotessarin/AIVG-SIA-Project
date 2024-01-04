@@ -16,10 +16,8 @@ public class RockBehaviour : MonoBehaviour
 
 	// This function destroys the device after a certain time if it doesn't hit anything
 	private IEnumerator WaitAndDestroy(float waitTime) {
-		//while (true) {
 		yield return new WaitForSecondsRealtime(waitTime);
 		Destroy(gameObject);
-		//}
 	}
 
 	// Start is called before the first frame update
@@ -31,7 +29,7 @@ public class RockBehaviour : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		//transform.Translate(Vector3.forward * (Time.unscaledDeltaTime * 3f), Space.Self);
+		
 	}
 
 	void FixedUpdate() {
@@ -43,8 +41,6 @@ public class RockBehaviour : MonoBehaviour
 		float stressDamage = 5f;
 		float grudgeDamage = 2f;
 		if (monster != null) {
-			Debug.Log(monster + " hitted");
-			
 			monster.TakeDamage(rockDamage, stressDamage, grudgeDamage);
 			Destroy(gameObject);
 		}

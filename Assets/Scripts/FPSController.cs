@@ -41,6 +41,7 @@ public class FPSController : MonoBehaviour
 		GameManager.GameStateChanged -= GameManagerOnGameStateChanged;
 	}
 
+	// Subscribes to GameManager's GameStateChanged event
 	private void GameManagerOnGameStateChanged(GameState state) {
 		switch ( state ) {
 			case GameState.Pause:
@@ -61,7 +62,7 @@ public class FPSController : MonoBehaviour
 	void Start()
 	{
 		characterController = GetComponent<CharacterController>();
-		target = transform.GetChild(2);
+		target = transform.GetChild(2);	// Gets the empty child gameobject placed at the player's head (for convenience)
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
 		isFPS = distanceZ < 1.0f;
@@ -71,6 +72,7 @@ public class FPSController : MonoBehaviour
 	{
 		distanceZ += Input.GetAxis("Mouse ScrollWheel");
 		distanceZ = Mathf.Clamp(distanceZ, 0.9f, 8.0f);
+		// If camera distance is less than 1, we snap it in first person mode
 		if (distanceZ < 1.0f) {
 			mouseX = 0f;
 			playerCamera.transform.localPosition = new Vector3(0f, 1.7f, 0.1f);
@@ -79,7 +81,7 @@ public class FPSController : MonoBehaviour
 			isFPS = false;
 		}
  
-		#region Handles Movment
+		#region Handles Movement
 		Vector3 forward = transform.TransformDirection(Vector3.forward);
 		Vector3 right = transform.TransformDirection(Vector3.right);
  
