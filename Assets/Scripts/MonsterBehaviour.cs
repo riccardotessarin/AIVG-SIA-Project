@@ -63,14 +63,7 @@ public class MonsterBehaviour : MonoBehaviour
 		{ MonsterState.berserk, 0.8f }
 	};
 
-	private FSM monsterFSM;
-
-	private DecisionTree calmDT;
-	private DecisionTree annoyedDT;
-	private DecisionTree replenishDT;
-	private DecisionTree angryDT;
-	private DecisionTree berserkDT;
-	
+	private FSM monsterFSM;	
 	private MonsterState currentState;
 	
     private void Awake() {
@@ -177,11 +170,11 @@ public class MonsterBehaviour : MonoBehaviour
 		//berserkd1.AddLink(false, berserkState);
 
 		// Setup my DecisionTree at the root node
-		calmDT = new DecisionTree(calmd1);
-		annoyedDT = new DecisionTree(annoyedd1);
-		replenishDT = new DecisionTree(replenishd1);
-		angryDT = new DecisionTree(angryd1);
-		berserkDT = new DecisionTree(berserkd1);
+		DecisionTree calmDT = new DecisionTree(calmd1);
+		DecisionTree annoyedDT = new DecisionTree(annoyedd1);
+		DecisionTree replenishDT = new DecisionTree(replenishd1);
+		DecisionTree angryDT = new DecisionTree(angryd1);
+		DecisionTree berserkDT = new DecisionTree(berserkd1);
 
 		// Define transitions by linking a decision tree to each state
 		calmState.AddTransition(calmDT);
