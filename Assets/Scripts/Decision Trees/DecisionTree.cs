@@ -4,8 +4,6 @@ using System.Collections.Generic;
 // Interface for both decisions and actions
 // Any node belonging to the decision tree must be walkable
 public interface IDTNode {
-	//DTAction Walk();
-	FSMState RecursiveWalk();
 	IDTNode Walk();
 }
 
@@ -34,16 +32,6 @@ public class DTDecision : IDTNode {
 		links.Add(value, next);
 	}
 
-	// Recursive version of Walk
-	// We call the selector and check if there is a matching link
-	// for the return value. In such case, we walk on the link
-	// No link means no state and null is returned
-	public FSMState RecursiveWalk() {
-		object o = Selector(null);
-		return links.ContainsKey(o) ? links[o].RecursiveWalk() : null;
-	}
-
-	// Non-recursive version of the tree walk
 	// We walk the tree while we find a decision node
 	// We return a leaf node or null. If we return a leaf node, it means we found a state
 	// If the decision doesn't have a link for the value returned by the selector, we return null

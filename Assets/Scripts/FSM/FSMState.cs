@@ -35,11 +35,6 @@ public class FSMState: IDTNode {
 	public void Exit() { foreach (FSMAction a in exitActions) a(); }
 
 	// FSMState is a leaf of the decision tree and will always return itself
-	public FSMState RecursiveWalk()
-	{
-		return this;
-	}
-
 	public IDTNode Walk()
 	{
 		return this;
