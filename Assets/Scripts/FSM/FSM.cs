@@ -12,43 +12,22 @@ public class FSM {
 	public FSM(FSMState state) {
 		states = new Dictionary<MonsterState, FSMState>();
 		current = state;
-		//current.Enter();
 	}
 
 	public void EnterFirstState() {
 		current.Enter();
 	}
 
+	// Explicitly set the current state
+	// Only used when getting back to the FSM from the FAM
 	public void SetCurrentState(MonsterState state) {
 		current = states[state];
 	}
 
-	// Examine transitions leading out from the current state
-	// If a condition is activated, then:
-	// (1) Execute actions associated to exit from the current state
-	// (2) Execute actions associated to the firing transition
-	// (3) Retrieve the new state and set is as the current one
-	// (4) Execute actions associated to entering the new current state
-	// Otherwise, if no condition is activated,
-	// (5) Execute actions associated to staying into the current state
-
-	/*
-
-	public void Update() { // NOTE: this is NOT a MonoBehaviour
-		FSMTransition transition = current.VerifyTransitions ();
-		if (transition != null) {
-			current.Exit();		// 1
-			transition.Fire();	// 2
-			current = current.NextState(transition);	// 3
-			current.Enter();	// 4
-		} else {
-			current.Stay();		// 5
-		}
-	}
-
-	*/
-
-	// This is the new Update method, using the decision tree
+	// Updates the state of the FSM using the decision tree of the current state
+	// It walks the tree until it finds a state
+	// If it doesn't find a leaf of type FSMState or the FSMState is the current state, it does nothing
+	// If it finds a new state, it exits the current state, sets the new state as the current one and enters it
 	public void Update() {
 		if (current.transionTree.walk() is FSMState transition && transition != current) {
 			current.Exit();

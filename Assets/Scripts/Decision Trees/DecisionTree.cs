@@ -5,8 +5,8 @@ using System.Collections.Generic;
 // Any node belonging to the decision tree must be walkable
 public interface IDTNode {
 	//DTAction Walk();
-	FSMState Walk();
-	IDTNode WalkNonRecursive();
+	FSMState RecursiveWalk();
+	IDTNode Walk();
 }
 
 // This delegate will defer functions to both
@@ -34,16 +34,21 @@ public class DTDecision : IDTNode {
 		links.Add(value, next);
 	}
 
+	// Recursive version of Walk
 	// We call the selector and check if there is a matching link
-	// for the return value. In such case, we Walk() on the link
-	// No link means no action and null is returned
-	public FSMState Walk() {
+	// for the return value. In such case, we walk on the link
+	// No link means no state and null is returned
+	public FSMState RecursiveWalk() {
 		object o = Selector(null);
-		return links.ContainsKey(o) ? links[o].Walk() : null;
+		return links.ContainsKey(o) ? links[o].RecursiveWalk() : null;
 	}
 
-	// Non-recursive version of Walk
-	public IDTNode WalkNonRecursive() {
+	// Non-recursive version of the tree walk
+	// We walk the tree while we find a decision node
+	// We return a leaf node or null. If we return a leaf node, it means we found a state
+	// If the decision doesn't have a link for the value returned by the selector, we return null
+	// The FSM Update will just label it as "stay in the current state" since the return value is not a state
+	public IDTNode Walk() {
 		IDTNode current = this;
 		while (current is DTDecision decision) {
 			DTDecision d = decision;
@@ -56,23 +61,6 @@ public class DTDecision : IDTNode {
 
 }
 
-// Action node
-/*
-public class DTAction : IDTNode {
-
-	// The methos to perform the action
-	public DTCall Action;
-
-	public DTAction(DTCall callee) {
-		Action = callee;
-	}
-
-	// We are an action, we are the one to be called
-	public DTAction Walk() { return this; }
-}
-
-*/
-
 // This class is holding our decision structure
 public class DecisionTree {
 
@@ -83,12 +71,10 @@ public class DecisionTree {
 		root = start;
 	}
 
-	// Walk the structure and call the resulting action (if any)
-	// a null means no action is required.
+	// Walk the structure and return the leaf state if we find one
+	// If we don't find a leaf, we return null
 	public FSMState walk() {
-		//FSMState result = root.Walk();
-		//if (result != null) return result;
-		if (root.WalkNonRecursive() is FSMState result) {
+		if (root.Walk() is FSMState result) {
 			return result;
 		}
 		return null;
