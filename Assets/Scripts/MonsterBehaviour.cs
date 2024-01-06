@@ -125,9 +125,9 @@ public class MonsterBehaviour : MonoBehaviour
 		//annoyedd3.AddLink(false, annoyedState);
 
 		// From replenish state...
-		DTDecision replenishd1 = new DTDecision(GoodMentalStatus);
-		DTDecision replenishd2 = new DTDecision(GoodPhysicalStatus);
-		DTDecision replenishd2bis = new DTDecision(GoodPhysicalStatus);
+		DTDecision replenishd1 = new DTDecision(GoodPhysicalStatus);
+		DTDecision replenishd2 = new DTDecision(GoodMentalStatus);
+		DTDecision replenishd2bis = new DTDecision(GoodMentalStatus);
 		DTDecision replenishd3 = new DTDecision(IsAngry);
 		DTDecision replenishd4 = new DTDecision(PlayerInRange);
 
@@ -135,14 +135,13 @@ public class MonsterBehaviour : MonoBehaviour
 		replenishd1.AddLink(true, replenishd2);
 		replenishd1.AddLink(false, replenishd2bis);
 		replenishd2.AddLink(true, calmState);
-		//replenishd2.AddLink(false, replenishState);
-		replenishd2bis.AddLink(true, replenishd3);
-		replenishd2bis.AddLink(false, replenishd4);
+		replenishd2.AddLink(false, replenishd3);
 		replenishd3.AddLink(true, angryState);
 		replenishd3.AddLink(false, annoyedState);
+		//replenishd2bis.AddLink(true, replenishState);
+		replenishd2bis.AddLink(false, replenishd4);
 		replenishd4.AddLink(true, berserkState);
 		//replenishd4.AddLink(false, replenishState);
-
 
 		// From angry state...
 		DTDecision angryd1 = new DTDecision(GoodPhysicalStatus);
@@ -277,7 +276,7 @@ public class MonsterBehaviour : MonoBehaviour
 		GameManager.Instance.SetNPCLoggingText(logText);
 
 		// Only used for debugging to manually increase/decrease status values
-		bool debugging = false;
+		bool debugging = true;
 		if (debugging) {
 			if (Input.GetKeyDown(KeyCode.Return)) {
 				health = 100f;
@@ -382,7 +381,7 @@ public class MonsterBehaviour : MonoBehaviour
 		return false;
 	}
 
-	// This only checks if the player is inside a certain range, the NPC can "sense" the player presence
+	// This checks if the player is inside a certain range, the NPC can "sense" the player presence
 	private object PlayerInRange(object o) {
 		if (Vector3.Distance(transform.position, player.transform.position) < maxPlayerDistance) {
 			return true;
