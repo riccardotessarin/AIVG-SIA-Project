@@ -276,7 +276,7 @@ public class MonsterBehaviour : MonoBehaviour
 		GameManager.Instance.SetNPCLoggingText(logText);
 
 		// Only used for debugging to manually increase/decrease status values
-		bool debugging = true;
+		bool debugging = false;
 		if (debugging) {
 			if (Input.GetKeyDown(KeyCode.Return)) {
 				health = 100f;
@@ -310,38 +310,18 @@ public class MonsterBehaviour : MonoBehaviour
 		components.Add(dragBehaviour.GetAcceleration(status));
 		components.Add(avoidBehaviourVolume.GetAcceleration(status));
 		
-		
-		switch (currentState)
-		{
-			case MonsterState.calm:
-				components.Add(freeFleeBehaviour.GetAcceleration(status));
-				break;
-			case MonsterState.annoyed:
-				// Continues free roaming while also avoiding the player
-				components.Add(freeFleeBehaviour.GetAcceleration(status));
-				break;
-			case MonsterState.angry:
+		if (currentState == MonsterState.calm || currentState == MonsterState.annoyed) {
+			// If annoyed, continues free roaming while also avoiding the player
+			components.Add(freeFleeBehaviour.GetAcceleration(status));
+		} else if (currentState == MonsterState.angry || currentState == MonsterState.berserk) {
 				if (CanSeePlayer()) {
 					components.Add(seekBehaviour.GetAcceleration(status));
 				} else {
 					// Continues free roaming
 					components.Add(freeFleeBehaviour.GetAcceleration(status));
 				}
-				break;
-			case MonsterState.berserk:
-				if (CanSeePlayer()) {
-					components.Add(seekBehaviour.GetAcceleration(status));
-				} else {
-					// Continues free roaming
-					components.Add(freeFleeBehaviour.GetAcceleration(status));
-				}
-				break;
-			case MonsterState.replenish:
-				// Tries to reach the restoration point while also avoiding the player
-				components.Add(seekRestoreBehaviour.GetAcceleration(status));
-				break;
-			default:
-				break;
+		} else if (currentState == MonsterState.replenish) {
+			components.Add(seekRestoreBehaviour.GetAcceleration(status));
 		}
 
 		// Blend the list to obtain a single acceleration to apply
