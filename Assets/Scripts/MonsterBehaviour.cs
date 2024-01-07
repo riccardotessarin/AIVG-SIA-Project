@@ -21,6 +21,7 @@ public class MonsterBehaviour : MonoBehaviour
 	private float grudgeStep = 0.1f;	// Grudge decrease per second
 	private float liveUpdateStep = 1f;	// Time interval for updating the NPC's MS and PS
 
+	List<MovementBehaviour> mbList;
 	DragBehaviour dragBehaviour;
 	AvoidBehaviourVolume avoidBehaviourVolume;
 	SeekBehaviour seekBehaviour;
@@ -50,6 +51,7 @@ public class MonsterBehaviour : MonoBehaviour
 	private bool isHealing = false;
 	private bool isSleeping = false;
 	private bool isEating = false;
+	private bool seekPlayer = false;
 	private float maxPlayerDistance = 10f;
 	private float maxattackRange = 2f;
 	private float attackPower = 10f;
@@ -71,6 +73,7 @@ public class MonsterBehaviour : MonoBehaviour
 		currentMaxSpeed = monsterSpeed["roam"];
 		rb = GetComponent<Rigidbody>();
 		animator = GetComponent<Animator>();
+		mbList = new List<MovementBehaviour>();
 	}
 
 	// Start is called before the first frame update
@@ -82,6 +85,8 @@ public class MonsterBehaviour : MonoBehaviour
 		seekBehaviour = GetComponent<SeekBehaviour>();
 		freeFleeBehaviour = GetComponent<FreeFleeBehaviour>();
 		seekRestoreBehaviour = GetComponent<SeekRestoreBehaviour>();
+		mbList.Add(dragBehaviour);
+		mbList.Add(avoidBehaviourVolume);
 
 		#region FSM setup
 
@@ -306,22 +311,17 @@ public class MonsterBehaviour : MonoBehaviour
 
 		// List of directions to blend obtained from each behaviour
 		List<Vector3> components = new List<Vector3>();
+		foreach (MovementBehaviour mb in mbList) {
+			components.Add(mb.GetAcceleration(status));
+		}
 		
-		components.Add(dragBehaviour.GetAcceleration(status));
-		components.Add(avoidBehaviourVolume.GetAcceleration(status));
-		
-		if (currentState == MonsterState.calm || currentState == MonsterState.annoyed) {
-			// If annoyed, continues free roaming while also avoiding the player
-			components.Add(freeFleeBehaviour.GetAcceleration(status));
-		} else if (currentState == MonsterState.angry || currentState == MonsterState.berserk) {
-				if (CanSeePlayer()) {
-					components.Add(seekBehaviour.GetAcceleration(status));
-				} else {
-					// Continues free roaming
-					components.Add(freeFleeBehaviour.GetAcceleration(status));
-				}
-		} else if (currentState == MonsterState.replenish) {
-			components.Add(seekRestoreBehaviour.GetAcceleration(status));
+		if (seekPlayer) {
+			if (CanSeePlayer()) {
+				components.Add(seekBehaviour.GetAcceleration(status));
+			} else {
+				// Continues free roaming
+				components.Add(freeFleeBehaviour.GetAcceleration(status));
+			}
 		}
 
 		// Blend the list to obtain a single acceleration to apply
@@ -414,14 +414,18 @@ public class MonsterBehaviour : MonoBehaviour
 	#region Actions
 
 	public void StartRoaming() {
+		mbList.Add(freeFleeBehaviour);
 		currentMaxSpeed = monsterSpeed["roam"];
 		currentState = MonsterState.calm;
 	}
 
 	public void StopRoaming() {
+		mbList.Remove(freeFleeBehaviour);
 	}
 
 	public void StartFleeing() {
+		// If annoyed, continues free roaming while also avoiding the player
+		mbList.Add(freeFleeBehaviour);
 		freeFleeBehaviour.SetIsFleeing(true);
 		currentMaxSpeed = monsterSpeed["flee"];
 		currentState = MonsterState.annoyed;
@@ -445,10 +449,12 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	public void StopFleeing() {
+		mbList.Remove(freeFleeBehaviour);
 		freeFleeBehaviour.SetIsFleeing(false);
 	}
 
 	public void StartAngry() {
+		seekPlayer = true;
 		currentMaxSpeed = monsterSpeed["chase"];
 		currentState = MonsterState.angry;
 	}
@@ -464,11 +470,13 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	public void StopAngry() {
+		seekPlayer = false;
 		if (seekCoroutine != null) { StopCoroutine(seekCoroutine); }
 		freeFleeBehaviour.SetIsSeeking(false);
 	}
 
 	public void StartBerserk() {
+		seekPlayer = true;
 		currentMaxSpeed = monsterSpeed["berserk"];
 		currentState = MonsterState.berserk;
 	}
@@ -484,11 +492,13 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	public void StopBerserk() {
+		seekPlayer = false;
 		if (seekCoroutine != null) { StopCoroutine(seekCoroutine); }
 		freeFleeBehaviour.SetIsSeeking(false);
 	}
 
 	public void StartReplenishing() {
+		mbList.Add(seekRestoreBehaviour);
 		currentMaxSpeed = monsterSpeed["flee"];
 		currentState = MonsterState.replenish;
 	}
@@ -500,6 +510,7 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	public void StopReplenishing() {
+		mbList.Remove(seekRestoreBehaviour);
 		if (isHealing || isEating || isSleeping) {
 			isHealing = false;
 			isEating = false;
