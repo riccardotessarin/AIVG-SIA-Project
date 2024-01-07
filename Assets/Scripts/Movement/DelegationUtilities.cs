@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MovementStatus {
@@ -42,6 +43,19 @@ public class Blender {
 	public static Vector3 Blend (List<Vector3> vl) {
 		Vector3 result = Vector3.zero;
 		foreach (Vector3 v in vl) result += v;
+		return result;
+	}
+
+	public static Vector3 DictBlend (Dictionary<MovementBehaviour, bool> mbDict, MovementStatus status) {
+		List<Vector3> vl = mbDict.Where(kvp => kvp.Value).Select(kvp => kvp.Key.GetAcceleration(status)).ToList();
+		return Blend (vl);
+	}
+
+	public static Vector3 Blend (Dictionary<MovementBehaviour, bool> mbDict, MovementStatus status) {
+		Vector3 result = Vector3.zero;
+		foreach (KeyValuePair<MovementBehaviour, bool> kvp in mbDict) {
+			if (kvp.Value) result += kvp.Key.GetAcceleration(status);
+		}
 		return result;
 	}
 }
