@@ -25,6 +25,7 @@ public class MonsterBehaviour : MonoBehaviour
 	DragBehaviour dragBehaviour;
 	AvoidBehaviourVolume avoidBehaviourVolume;
 	SeekBehaviour seekBehaviour;
+	FreeRoamingBehaviour freeRoamingBehaviour;
 	FreeSeekBehaviour freeSeekBehaviour;
 	FreeFleeBehaviour freeFleeBehaviour;
 	SeekRestoreBehaviour seekRestoreBehaviour;
@@ -84,6 +85,7 @@ public class MonsterBehaviour : MonoBehaviour
 		dragBehaviour = GetComponent<DragBehaviour>();
 		avoidBehaviourVolume = GetComponent<AvoidBehaviourVolume>();
 		seekBehaviour = GetComponent<SeekBehaviour>();
+		freeRoamingBehaviour = GetComponent<FreeRoamingBehaviour>();
 		freeSeekBehaviour = GetComponent<FreeSeekBehaviour>();
 		freeFleeBehaviour = GetComponent<FreeFleeBehaviour>();
 		seekRestoreBehaviour = GetComponent<SeekRestoreBehaviour>();
@@ -420,19 +422,19 @@ public class MonsterBehaviour : MonoBehaviour
 	#region Actions
 
 	public void StartRoaming() {
-		mbList.Add(freeFleeBehaviour);
+		mbList.Add(freeRoamingBehaviour);
 		currentMaxSpeed = monsterSpeed["roam"];
 		currentState = MonsterState.calm;
 	}
 
 	public void StopRoaming() {
-		mbList.Remove(freeFleeBehaviour);
+		mbList.Remove(freeRoamingBehaviour);
 	}
 
 	public void StartFleeing() {
 		// If annoyed, continues free roaming while also avoiding the player
 		mbList.Add(freeFleeBehaviour);
-		freeFleeBehaviour.SetIsFleeing(true);
+		//freeFleeBehaviour.SetIsFleeing(true);
 		currentMaxSpeed = monsterSpeed["flee"];
 		currentState = MonsterState.annoyed;
 	}
@@ -456,7 +458,7 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StopFleeing() {
 		mbList.Remove(freeFleeBehaviour);
-		freeFleeBehaviour.SetIsFleeing(false);
+		//freeFleeBehaviour.SetIsFleeing(false);
 	}
 
 	public void StartAngry() {

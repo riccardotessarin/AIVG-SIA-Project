@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FreeSeekBehaviour : FreeFleeBehaviour {
+public class FreeSeekBehaviour : FreeRoamingBehaviour {
 
 	public Transform destination;
 	
