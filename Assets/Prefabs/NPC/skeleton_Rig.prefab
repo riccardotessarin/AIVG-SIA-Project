@@ -740,13 +740,14 @@ GameObject:
   - component: {fileID: 2666633095303263477}
   - component: {fileID: 477400922}
   - component: {fileID: 477400921}
-  - component: {fileID: 477400914}
+  - component: {fileID: 477400920}
   - component: {fileID: 477400915}
   - component: {fileID: 477400916}
   - component: {fileID: 477400917}
+  - component: {fileID: 2120287731}
   - component: {fileID: 477400918}
+  - component: {fileID: 2120287730}
   - component: {fileID: 477400919}
-  - component: {fileID: 477400920}
   m_Layer: 0
   m_Name: skeleton_Rig
   m_TagString: NPC
@@ -822,7 +823,7 @@ CapsuleCollider:
   m_Height: 1.8168038
   m_Direction: 1
   m_Center: {x: 0, y: 0.88899285, z: 0}
---- !u!114 &477400914
+--- !u!114 &477400920
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -831,13 +832,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 2666633095293732679}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eee5390723678684d998f9951d4d3778, type: 3}
+  m_Script: {fileID: 11500000, guid: 3d89c73d05e422e4a8fde7d241b7f52a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  steer: 30
-  brakeAt: 1
-  fleeRange: 0
-  destination: {fileID: 0}
+  player: {fileID: 0}
+  minLinearSpeed: 0.5
+  currentMaxSpeed: 0
 --- !u!114 &477400915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -882,6 +882,24 @@ MonoBehaviour:
   steer: 15
   brakeAt: 0
   fleeRange: 0
+--- !u!114 &2120287731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2666633095293732679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3e5d2bfbcedef743ac9b128b680e279, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steer: 0
+  brakeAt: 0
+  fleeRange: 0
+  targetRandomPosition: {x: 20, y: 1, z: 20}
+  lastSeenPosition: {x: 20, y: 1, z: 20}
+  isSeeking: 0
 --- !u!114 &477400918
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -897,11 +915,29 @@ MonoBehaviour:
   steer: 30
   brakeAt: 5
   fleeRange: 10
-  fleeFrom: {fileID: 0}
   targetRandomPosition: {x: 20, y: 1, z: 20}
   lastSeenPosition: {x: 20, y: 1, z: 20}
-  isFleeing: 0
   isSeeking: 0
+  fleeFrom: {fileID: 0}
+--- !u!114 &2120287730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2666633095293732679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87c155031c52a3947a5ce0a3e2ec2d83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steer: 0
+  brakeAt: 0
+  fleeRange: 0
+  targetRandomPosition: {x: 20, y: 1, z: 20}
+  lastSeenPosition: {x: 20, y: 1, z: 20}
+  isSeeking: 0
+  destination: {fileID: 0}
 --- !u!114 &477400919
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -919,21 +955,6 @@ MonoBehaviour:
   fleeRange: 10
   destination: {fileID: 0}
   fleeFrom: {fileID: 0}
---- !u!114 &477400920
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2666633095293732679}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d89c73d05e422e4a8fde7d241b7f52a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 0}
-  minLinearSpeed: 0.5
-  currentSpeed: 0
 --- !u!1 &2666633095293732685
 GameObject:
   m_ObjectHideFlags: 0
