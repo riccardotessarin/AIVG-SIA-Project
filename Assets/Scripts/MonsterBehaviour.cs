@@ -425,8 +425,8 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StopAngry() {
 		freeSeekBehaviour.StopSeekingCoroutine();
+		freeSeekBehaviour.SetIsSeeking(false);
 		mbList.Remove(freeSeekBehaviour);
-		freeFleeBehaviour.SetIsSeeking(false);
 	}
 
 	public void StartBerserk() {
@@ -447,8 +447,8 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StopBerserk() {
 		freeSeekBehaviour.StopSeekingCoroutine();
+		freeSeekBehaviour.SetIsSeeking(false);
 		mbList.Remove(freeSeekBehaviour);
-		freeFleeBehaviour.SetIsSeeking(false);
 	}
 
 	public void StartReplenishing() {

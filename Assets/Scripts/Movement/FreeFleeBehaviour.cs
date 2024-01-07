@@ -4,8 +4,10 @@ using UnityEngine;
 public class FreeFleeBehaviour: FreeRoamingBehaviour {
 
 	public Transform fleeFrom;
+	protected bool inRange = false;
+	protected float percentage = 0f;
 
-	// Returns the flee acceleration if the player is within the flee range (annoyed status)
+	// If the NPC is also fleeing (annoyed state) while roaming, it takes the flee acceleration into account
 	public override Vector3 GetAcceleration(MovementStatus status) {
 		if (fleeFrom != null) {
 			Vector3 fleeAdj = new Vector3();
