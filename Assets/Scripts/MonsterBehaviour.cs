@@ -25,11 +25,12 @@ public class MonsterBehaviour : MonoBehaviour
 	DragBehaviour dragBehaviour;
 	AvoidBehaviourVolume avoidBehaviourVolume;
 	SeekBehaviour seekBehaviour;
+	FreeSeekBehaviour freeSeekBehaviour;
 	FreeFleeBehaviour freeFleeBehaviour;
 	SeekRestoreBehaviour seekRestoreBehaviour;
-	private bool sensedPlayer = false;
-	private float maxSeekTime = 15f;
-	private Coroutine seekCoroutine = null;
+	//private bool sensedPlayer = false;
+	//private float maxSeekTime = 15f;
+	//private Coroutine seekCoroutine = null;
 
 	// Max speed values for NPC movement in different states
 	private Dictionary<string, float> monsterSpeed = new Dictionary<string, float> {
@@ -51,7 +52,7 @@ public class MonsterBehaviour : MonoBehaviour
 	private bool isHealing = false;
 	private bool isSleeping = false;
 	private bool isEating = false;
-	private bool seekPlayer = false;
+	//private bool seekPlayer = false;
 	private float maxPlayerDistance = 10f;
 	private float maxattackRange = 2f;
 	private float attackPower = 10f;
@@ -83,6 +84,7 @@ public class MonsterBehaviour : MonoBehaviour
 		dragBehaviour = GetComponent<DragBehaviour>();
 		avoidBehaviourVolume = GetComponent<AvoidBehaviourVolume>();
 		seekBehaviour = GetComponent<SeekBehaviour>();
+		freeSeekBehaviour = GetComponent<FreeSeekBehaviour>();
 		freeFleeBehaviour = GetComponent<FreeFleeBehaviour>();
 		seekRestoreBehaviour = GetComponent<SeekRestoreBehaviour>();
 		mbList.Add(dragBehaviour);
@@ -315,6 +317,7 @@ public class MonsterBehaviour : MonoBehaviour
 			components.Add(mb.GetAcceleration(status));
 		}
 		
+		/*
 		if (seekPlayer) {
 			if (CanSeePlayer()) {
 				components.Add(seekBehaviour.GetAcceleration(status));
@@ -323,6 +326,7 @@ public class MonsterBehaviour : MonoBehaviour
 				components.Add(freeFleeBehaviour.GetAcceleration(status));
 			}
 		}
+		*/
 
 		// Blend the list to obtain a single acceleration to apply
 		Vector3 blendedAcceleration = Blender.Blend(components);
@@ -376,6 +380,7 @@ public class MonsterBehaviour : MonoBehaviour
 		return false;
 	}
 	
+	/*
 	// This checks if the NPC can see the player (returning true will start the seek behaviour)
 	private bool CanSeePlayer(){
 		RaycastHit hit;
@@ -408,6 +413,7 @@ public class MonsterBehaviour : MonoBehaviour
 		yield return new WaitForSecondsRealtime(giveUpTime);
 		freeFleeBehaviour.SetIsSeeking(false);
 	}
+	*/
 
 	#endregion
 	
@@ -454,7 +460,8 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	public void StartAngry() {
-		seekPlayer = true;
+		//seekPlayer = true;
+		mbList.Add(freeSeekBehaviour);
 		currentMaxSpeed = monsterSpeed["chase"];
 		currentState = MonsterState.angry;
 	}
@@ -470,13 +477,16 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	public void StopAngry() {
-		seekPlayer = false;
-		if (seekCoroutine != null) { StopCoroutine(seekCoroutine); }
+		//seekPlayer = false;
+		freeSeekBehaviour.StopSeekingCoroutine();
+		mbList.Remove(freeSeekBehaviour);
+		//if (seekCoroutine != null) { StopCoroutine(seekCoroutine); }
 		freeFleeBehaviour.SetIsSeeking(false);
 	}
 
 	public void StartBerserk() {
-		seekPlayer = true;
+		//seekPlayer = true;
+		mbList.Add(freeSeekBehaviour);
 		currentMaxSpeed = monsterSpeed["berserk"];
 		currentState = MonsterState.berserk;
 	}
@@ -492,8 +502,10 @@ public class MonsterBehaviour : MonoBehaviour
 	}
 
 	public void StopBerserk() {
-		seekPlayer = false;
-		if (seekCoroutine != null) { StopCoroutine(seekCoroutine); }
+		//seekPlayer = false;
+		freeSeekBehaviour.StopSeekingCoroutine();
+		mbList.Remove(freeSeekBehaviour);
+		//if (seekCoroutine != null) { StopCoroutine(seekCoroutine); }
 		freeFleeBehaviour.SetIsSeeking(false);
 	}
 

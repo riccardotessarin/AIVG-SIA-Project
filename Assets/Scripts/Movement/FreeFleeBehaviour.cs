@@ -6,20 +6,20 @@ public class FreeFleeBehaviour : MovementBehaviour {
 	public Transform fleeFrom;
 
 	[SerializeField]
-	private Vector3 targetRandomPosition = new Vector3(20, 1, 20);
+	protected Vector3 targetRandomPosition = new Vector3(20, 1, 20);
 	[SerializeField]
-	private Vector3 lastSeenPosition = new Vector3(20, 1, 20);
-	private float time = 0f;
-	private float timeToTarget = 5f;
-	private bool inRange = false;
-	private float percentage = 0f;
+	protected Vector3 lastSeenPosition = new Vector3(20, 1, 20);
+	protected float time = 0f;
+	protected float timeToTarget = 5f;
+	protected bool inRange = false;
+	protected float percentage = 0f;
 	[SerializeField]
-	private bool isFleeing = false;
+	protected bool isFleeing = false;
 	[SerializeField]
-	private bool isSeeking = false;
-	private float minRange = 0f;
-	private float maxRange = 20f;
-	private float maxTargetedRange = 3f;
+	protected bool isSeeking = false;
+	protected float minRange = 0f;
+	protected float maxRange = 20f;
+	protected float maxTargetedRange = 3f;
 	
 	// Takes random positions and moves towards them for free roaming movement
 	// If it is also fleeing (annoyed status) while roaming, it takes the flee acceleration into account

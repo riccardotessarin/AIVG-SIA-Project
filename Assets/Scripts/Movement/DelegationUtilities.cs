@@ -48,7 +48,7 @@ public class Blender {
 
 	public static Vector3 DictBlend (Dictionary<MovementBehaviour, bool> mbDict, MovementStatus status) {
 		List<Vector3> vl = mbDict.Where(kvp => kvp.Value).Select(kvp => kvp.Key.GetAcceleration(status)).ToList();
-		return Blend (vl);
+		return Blend(vl);
 	}
 
 	public static Vector3 Blend (Dictionary<MovementBehaviour, bool> mbDict, MovementStatus status) {

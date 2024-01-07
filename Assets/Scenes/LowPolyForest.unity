@@ -16808,6 +16808,32 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b664b526df62ee41be7b9d307dedd81, type: 3}
+--- !u!1 &2120287718 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2666633095293732679, guid: e3246f30812c87046a991b2afb787b17, type: 3}
+  m_PrefabInstance: {fileID: 309989132}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2120287730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2120287718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87c155031c52a3947a5ce0a3e2ec2d83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  steer: 0
+  brakeAt: 0
+  fleeRange: 0
+  fleeFrom: {fileID: 0}
+  targetRandomPosition: {x: 20, y: 1, z: 20}
+  lastSeenPosition: {x: 20, y: 1, z: 20}
+  isFleeing: 0
+  isSeeking: 0
+  destination: {fileID: 1984018296}
 --- !u!4 &2140381215 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4000010726284366, guid: 10ba00bacc400d349ae0bc6a9bff5abc, type: 3}
