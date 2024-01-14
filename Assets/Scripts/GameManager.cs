@@ -26,11 +26,11 @@ public class GameManager : MonoBehaviour {
 	#region Movement Behaviours Parameters
 	public float sightRange = 2f;
 	public float sightAngle = 45f;
-	public float steer = 60f; // Maybe make it 30 for avoid behaviour volume
+	public float steer = 60f;
 	public float backpedal = 10f;
 	public float gas = 3f;
 	public float brake = 20f;
-	public float brakeAt = 1f; // Check if this can be shared by all behaviours or revert to 5 (1 only for seek)
+	public float brakeAt = 1f;
 	public float stopAt = 0.01f;
 	public float fleeRange = 5f;
 	#endregion
