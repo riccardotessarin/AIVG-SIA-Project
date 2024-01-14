@@ -17,8 +17,8 @@ public class MonsterBehaviour : MonoBehaviour
 	private float reactionTime = 1.5f;
 	private float hungerStep = 0.5f;	// Hunger increase per second
 	private float sleepinessStep = 0.5f;	// Sleepiness increase per second
-	private float stressStep = 1f;	// Stress decrease per second
-	private float grudgeStep = 0.1f;	// Grudge decrease per second
+	public float stressStep = 1f;	// Stress decrease per second
+	public float grudgeStep = 0.2f;	// Grudge decrease per second
 	private float liveUpdateStep = 1f;	// Time interval for updating the NPC's MS and PS
 
 	List<MovementBehaviour> mbList;
@@ -36,7 +36,7 @@ public class MonsterBehaviour : MonoBehaviour
 		{ "chase", 5f },
 		{ "berserk", 8f }
 	};
-	public float minLinearSpeed = 0.5f;
+	private float minLinearSpeed = 0.5f;
 	public float currentMaxSpeed;	// Used for both linear and angular speed
 	private MovementStatus status;
 
@@ -46,9 +46,6 @@ public class MonsterBehaviour : MonoBehaviour
 	private float stress = 0f;
 	private float grudge = 0f;
 
-	private bool isHealing = false;
-	private bool isSleeping = false;
-	private bool isEating = false;
 	private float maxPlayerDistance = 10f;
 	private float maxattackRange = 2f;
 	private float attackPower = 10f;
@@ -465,11 +462,6 @@ public class MonsterBehaviour : MonoBehaviour
 
 	public void StopReplenishing() {
 		mbList.Remove(seekRestoreBehaviour);
-		if (isHealing || isEating || isSleeping) {
-			isHealing = false;
-			isEating = false;
-			isSleeping = false;
-		}
 	}
 
 	private IEnumerator Attack() {
